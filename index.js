@@ -1,23 +1,34 @@
+require('dotenv').config();
 const express = require('express');
-const dotenv = require('dotenv');
 const hbs = require('hbs');
+const mysqlConnection = require('./db_utils');
 
+// express app instance
 const app = express();
-dotenv.config();
 
+// routes
 const routes = require('./routes.js');
 app.use('/', routes);
 
-app.set('view engine', 'hbs');
-
-hbs.registerPartials(__dirname + '/views/partials');
-
-port = process.env.PORT || 3000;
-
+// middleware
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(express.static('public'));
 
-app.listen(port, function () {
-	console.log('Server running at port: ' + port);
+// handlebars
+app.set('view engine', 'hbs');
+hbs.registerPartials(__dirname + '/views/partials');
+
+// server and database connection
+const port = process.env.port || 3000;
+mysqlConnection.connect((error) => {
+	if(error)
+		throw error;
+	else {
+		console.log('Connected to MySQL database.');
+		app.listen(port, () => {
+			console.log('Server running at port: ' + port + '.');
+		});
+	}
 });
+
