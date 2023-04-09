@@ -11,9 +11,12 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.2",
+    "bootstrap": "^5.2.3",
+    "bootstrap-table": "^1.21.4",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "hbs": "^4.2.0",
+    "jquery": "^3.6.4",
     "mysql2": "^3.2.0",
     "proxmox": "^1.0.0"
   }

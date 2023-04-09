@@ -4,10 +4,378 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/styles.css">
+    <title>Home - IMDb Distributed Database System</title>
+    <link rel="shortcut icon" type="image/jpg" href="/favicon.ico"/>
+    <!--Bootstrap-->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css"/>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!--Icons Library-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!--JQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+    <!--Bootstrap Table--->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+    <script src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+    <script src="https://unpkg.com/tableexport.jquery.plugin/tableExport.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table-locale-all.min.js"></script>
 </head>
 <body>
-    <h1>STADVDB MCO2 - Distributed Database System</h1>
+  <div class="container w-75 d-flex flex-column justify-content-center align-items-center">
+    <!--Web App Title-->
+	  <span class="fs-3 my-5 fw-bold text-center">
+      <i class="fa-solid fa-database fa-2xl"></i>
+      <i class="fa-brands fa-imdb fa-2xl"></i>
+      Distributed Database System Global Concurrency Controller 
+    </span>
+    <!--Web App Description-->
+    <p class="text-center">
+      This is a web application to simulate a global concurrency control for the distributed database system. 
+      It can show two or more concurrently executing transactions in two or more nodes and leave the database in a consistent state.
+      It can simulate global crash and recovery and show how the system recovers from failures when global transactions are executed.
+    </p>
+    <!--Table of All Data-->
+    <div class="row">
+      <!--Table View: All Data-->
+      <!--TODO: implement with hbs-->
+      <div class="col w-75">
+        <table
+          class="table-bordered border-primary"
+          id="table"
+          data-toggle="table"
+          data-height="460"
+          data-pagination="true"
+          data-locale="en-US"
+          data-search="true"
+          data-icons="icons"
+          data-icons-prefix="icon"
+          data-show-columns="true"
+          data-search-on-enter-key="true"
+          data-show-search-button="true"
+          data-show-toggle="true"
+          data-url="/sampleData.json">
+        </table>
+      </div>
+    </div>
+    <!--Concurrency Control & Consistency: Simulation-->
+    <div class="row justify-content-center">
+      <span class="fs-5 mt-5 mb-3 text-center text-decoration-underline">Concurrency Control & Consistency</span>
+      <!--Buttons: Isolation Levels-->
+      <select id="isolationLevel" class="form-select mb-2 w-25">
+        <option selected>Select Isolation Level</option>
+        <option value="readUncom">Read Uncommitted</option>
+        <option value="readCom">Read Committed</option>
+        <option value="readRep">Read Repeatable</option>
+        <option value="serializable">Serializable</option>
+      </select>
+      <div class="row">
+        <div class="col-sm-6">
+          <!--Case #1: Search-->
+          <div class="card mb-2">
+            <div class="card-body">
+              <h5 class="card-title">Search</h5>
+              <p class="card-text fs-6">Search using ID, Title, Year, Genre, Director, or Actor</p>
+              <input type="search" class="form-control mb-2" id="search">
+              <a href="#" class="btn btn-primary">Search</a>
+            </div>
+          </div>
+          <!--Case #2: Delete-->
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Delete</h5>
+              <p class="card-text fs-6">Enter ID of Movie to Delete</p>
+              <input type="number" class="form-control mb-2" id="delete">
+              <a href="#" class="btn btn-primary">Delete</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <!--Case #2: Update-->
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Update</h5>
+              <p class="card-text fs-6">Update an entry of your choice by filling out all the necesarry fields (a blank field means no changes).</p>
+                <div class="form-floating my-2">
+                <input type="number" class="form-control" id="updateId" placeholder="ID" id="idfloating"></input>
+                <label for="idfloating">ID of Movie to Update</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="text" class="form-control" id="updateTitle" placeholder="Title" id="titlefloating"></input>
+                <label for="titlefloating">Title</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="number" class="form-control" id="updateYear" placeholder="Year" id="yearfloating"></input>
+                <label for="yearfloating">Year</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="text" class="form-control" id="updateGenre" placeholder="Genre" id="genrefloating"></input>
+                <label for="genrefloating">Genre</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="text" class="form-control" id="updateDirector" placeholder="Director" id="directorfloating"></input>
+                <label for="directorfloating">Director</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="text" class="form-control" id="updateActor1" placeholder="Actor 1" id="actor1floating"></input>
+                <label for="actor1floating">Actor 1</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="text" class="form-control" id="updateActor2" placeholder="Actor 2" id="actor2floating"></input>
+                <label for="actor2floating">Actor 2</label>
+                </div>
+              <a href="#" class="btn btn-primary">Update</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--Global Failure and Recovery: Simulation-->
+    <div class="row justify-content-center">
+      <span class="fs-5 mt-5 mb-3 text-center text-decoration-underline">Global Failure and Recovery</span>
+      <div class="row">
+        <div class="col-sm-6">
+          <!--Fail: Search-->
+          <div class="card mb-2">
+            <div class="card-body">
+              <h5 class="card-title">Search</h5>
+              <p class="card-text fs-6">Search using ID, Title, Year, Genre, Director, or Actor</p>
+              <input type="search" class="form-control mb-2" id="failSearch">
+              <a href="#" class="btn btn-primary">Search</a>
+            </div>
+          </div>
+          <!--Fail: Delete-->
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Delete</h5>
+              <p class="card-text fs-6">Enter ID of Movie to Delete</p>
+              <input type="number" class="form-control mb-2" id="failDelete">
+              <a href="#" class="btn btn-primary">Delete</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <!--Fail: Update-->
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Update</h5>
+              <p class="card-text fs-6">Update an entry of your choice by filling out all the necesarry fields (a blank field means no changes).</p>
+                <div class="form-floating my-2">
+                <input type="number" class="form-control" id="failUpdateId" placeholder="ID" id="failidfloating"></input>
+                <label for="failidfloating">ID of Movie to Update</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="text" class="form-control" id="failUpdateTitle" placeholder="Title" id="failtitlefloating"></input>
+                <label for="failtitlefloating">Title</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="number" class="form-control" id="failUpdateYear" placeholder="Year" id="failyearfloating"></input>
+                <label for="failyearfloating">Year</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="text" class="form-control" id="failUpdateGenre" placeholder="Genre" id="failgenrefloating"></input>
+                <label for="failgenrefloating">Genre</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="text" class="form-control" id="failUpdateDirector" placeholder="Director" id="faildirectorfloating"></input>
+                <label for="faildirectorfloating">Director</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="text" class="form-control" id="failUpdateActor1" placeholder="Actor 1" id="failactor1floating"></input>
+                <label for="failactor1floating">Actor 1</label>
+                </div>
+                <div class="form-floating my-2">
+                <input type="text" class="form-control" id="failUpdateActor2" placeholder="Actor 2" id="failactor2floating"></input>
+                <label for="failactor2floating">Actor 2</label>
+                </div>
+              <a href="#" class="btn btn-primary">Update</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Buttons: Failure Cases--->
+      <div class="card my-2 w-75">
+        <div class="card-body">
+          <div class="btn-group" role="group">
+            <!--Case #1-->
+            <input type="radio" class="btn-check" name="casefailBtn" id="failCase1" autocomplete="off" checked>
+            <label class="btn btn-outline-primary" for="failCase1">Case 1: Unavailable Central Node</label>
+
+            <!--Case #2A-->
+            <input type="radio" class="btn-check" name="casefailBtn" id="failCase2A" autocomplete="off">
+            <label class="btn btn-outline-primary" for="failCase2A">Case 2A: Unavailable Node 2</label>
+
+            <!--Case #2B-->
+            <input type="radio" class="btn-check" name="casefailBtn" id="failCase2B" autocomplete="off">
+            <label class="btn btn-outline-primary" for="failCase2B">Case 2B: Unavailable Node 3</label>
+
+            <!--Case #3A-->
+            <input type="radio" class="btn-check" name="casefailBtn" id="failCase3A" autocomplete="off">
+            <label class="btn btn-outline-primary" for="failCase3A">Case 3A: Replicate from Node 2</label>
+
+            <!--Case #3B-->
+            <input type="radio" class="btn-check" name="casefailBtn" id="failCase3B" autocomplete="off">
+            <label class="btn btn-outline-primary" for="failCase3B">Case 3B: Replicate from Node 3</label>
+
+            <!--Case #4A-->
+            <input type="radio" class="btn-check" name="casefailBtn" id="failCase4A" autocomplete="off">
+            <label class="btn btn-outline-primary" for="failCase4A">Case 4A: Write to Node 2</label>
+
+            <!--Case #4B-->
+            <input type="radio" class="btn-check" name="casefailBtn" id="failCase4B" autocomplete="off">
+            <label class="btn btn-outline-primary" for="failCase4B">Case 4B: Write to Node 3</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--Reports-->
+    <div class="row w-75 justify-content-center">
+      <span class="fs-5 mt-5 mb-3 text-center text-decoration-underline">Generated Reports</span>
+      <!--Report 1-->
+      <div class="col">
+        <div class="card">
+          <div class="card-header">Number of Movies per Year</div>
+          <div class="card-body"> 
+            <table
+              id="tableReport1"
+              data-toggle="table"
+              data-height="460"
+              data-pagination="true"
+              data-locale="en-US"
+              data-url="/sampleData.json">
+              <thead>
+                <tr>
+                  <th data-field="year">Year</th>
+                  <!--TODO: Change this field-->
+                  <th data-field="title">Number of Movies</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!--Report 2-->
+      <div class="col">
+        <div class="card">
+          <div class="card-header">Average rank of all Movies under each Genre</div>
+          <div class="card-body"> 
+            <table
+              id="tableReport2"
+              data-toggle="table"
+              data-height="460"
+              data-pagination="true"
+              data-locale="en-US"
+              data-url="/sampleData.json">
+              <thead>
+                <tr>
+                  <th data-field="genre">Genre</th>
+                  <th data-field="title">Title</th>
+                  <!--TODO: Change this field-->
+                  <th data-field="year">Average Rank</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row w-75 mt-4 mb-5 justify-content-center">
+      <div class="col">
+        <!--Report 3-->
+        <div class="card">
+          <div class="card-header">Top 20 highest ranking Movies for each Genre</div>
+          <div class="card-body"> 
+            <table
+              id="tableReport2"
+              data-toggle="table"
+              data-height="460"
+              data-pagination="true"
+              data-locale="en-US"
+              data-url="/sampleData.json">
+              <thead>
+                <tr>
+                  <th data-field="genre">Genre</th>
+                  <th data-field="title">Title</th>
+                  <!--TODO: Change this field-->
+                  <th data-field="year">Top 20</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+          </div>
+      </div>
+    </div>
+  </div>
+
+<!--Sample Table Controller-->
+<!--TODO: move to HomeController.js-->
+<script>
+  var $table = $('#table')
+
+  function initTable() {
+    $table.bootstrapTable('destroy').bootstrapTable({
+      height: 460,
+      locale: $('#locale').val(),
+      columns: [
+        [{
+          title: 'ID',
+          field: 'id',
+          rowspan: 2,
+          align: 'center',
+          valign: 'middle'
+        }, {
+          title: 'Movie Details',
+          colspan: 6,
+          align: 'center'
+        }],
+        [{
+          field: 'title',
+          title: 'Title',
+          align: 'center'
+        }, {
+          field: 'year',
+          title: 'Year',
+          align: 'center',
+        }, {
+          field: 'genre',
+          title: 'Genre',
+          align: 'center'
+        }, {
+          field: 'director',
+          title: 'Director',
+          align: 'center'
+        }, {
+          field: 'actor1',
+          title: 'Actor 1',
+          align: 'center'
+        }, {
+          field: 'actor2',
+          title: 'Actor 2',
+          align: 'center'
+        }]
+      ]
+    })
+  }
+
+  $(function() {
+    // to change toolbar icons
+    $.extend($.fn.bootstrapTable.defaults.icons, {
+      columns: "fa-solid fa-table-columns",
+      search: "fa-solid fa-magnifying-glass",
+      toggleOff: "fa-solid fa-toggle-off",
+      toggleOn: "fa-solid fa-toggle-on"
+    });
+
+
+
+    initTable()
+    $("th").css("border-color","#0d6efd");
+
+    //$('#locale').change(initTable)
+  })
+</script>
 </body>
 </html>

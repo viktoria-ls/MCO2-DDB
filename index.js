@@ -14,6 +14,10 @@ app.use('/', routes);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+app.use('/controller', express.static('controllers'));
+app.use('/favicon.ico', express.static('public/images/favicon.ico'));
+app.use("/css",express.static("./node_modules/bootstrap/dist/css"));
+app.use("/js",express.static("./node_modules/bootstrap/dist/js"));
 
 // handlebars
 app.set('view engine', 'hbs');
