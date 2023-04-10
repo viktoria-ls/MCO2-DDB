@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central Node - IMDb Distributed Database System</title>
+    <link rel="shortcut icon" type="image/jpg" href="/favicon.ico"/>
+    <!--Bootstrap-->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css"/>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!--Icons Library-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!--JQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+    <!--Bootstrap Table--->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+    <script src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+    <script src="https://unpkg.com/tableexport.jquery.plugin/tableExport.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table-locale-all.min.js"></script>
+</head>
+<body>
+  <div class="container w-75 d-flex flex-column justify-content-center align-items-center">
+    <!--Web App Title-->
+	  <span class="fs-3 my-5 fw-bold text-center">
+      <i class="fa-solid fa-database fa-2xl"></i>
+      <i class="fa-brands fa-imdb fa-2xl"></i>
+      Distributed Database System Global: Central Node
+    </span>
+    <!--Web App Description-->
+    <p class="text-center">
+      This node has its own database with ALL the contents of the database.
+    </p>
+    <!--Table of All Data-->
+    <div class="row">
+      <!--Table View: All Data-->
+      <!--TODO: implement with hbs-->
+      <div class="card">
+        <table
+          id="tableCentralNode"
+          data-toggle="table"
+          data-height="460"
+          data-pagination="true"
+          data-locale="en-US"
+          data-search="true"
+          data-icons="icons"
+          data-icons-prefix="icon"
+          data-show-columns="true"
+          data-search-on-enter-key="true"
+          data-show-search-button="true"
+          data-show-toggle="true"
+          data-url="/sampleData.json">
+        </table>
+      </div>
+    </div>
+  </div>
+
+<!--Sample Table Controller-->
+<!--TODO: move to CentralNodeController.js-->
+<script>
+  var $table = $('#tableCentralNode')
+
+  function initTable() {
+    $table.bootstrapTable('destroy').bootstrapTable({
+      height: 460,
+      locale: $('#localeCentralNode').val(),
+      columns: [
+        [{
+          title: 'ID',
+          field: 'id',
+          rowspan: 2,
+          align: 'center',
+          valign: 'middle'
+        }, {
+          title: 'Movie Details',
+          colspan: 6,
+          align: 'center'
+        }],
+        [{
+          field: 'title',
+          title: 'Title',
+          align: 'center'
+        }, {
+          field: 'year',
+          title: 'Year',
+          align: 'center',
+        }, {
+          field: 'genre',
+          title: 'Genre',
+          align: 'center'
+        }, {
+          field: 'director',
+          title: 'Director',
+          align: 'center'
+        }, {
+          field: 'actor1',
+          title: 'Actor 1',
+          align: 'center'
+        }, {
+          field: 'actor2',
+          title: 'Actor 2',
+          align: 'center'
+        }]
+      ]
+    })
+  }
+
+  $(function() {
+    // to change toolbar icons
+    $.extend($.fn.bootstrapTable.defaults.icons, {
+      columns: "fa-solid fa-table-columns",
+      search: "fa-solid fa-magnifying-glass",
+      toggleOff: "fa-solid fa-toggle-off",
+      toggleOn: "fa-solid fa-toggle-on"
+    });
+
+
+
+    initTable()
+
+    //$('#localeCentralNode').change(initTable)
+  })
+</script>
+</body>
+</html>

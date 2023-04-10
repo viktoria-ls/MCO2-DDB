@@ -8,14 +8,3 @@ body {
     font-family: 'Varela Round', sans-serif;
     color: #1E3050;
 }
-
-table-border-changer.table-border-color{
-    border:1px solid blue;
-    margin-top:20px;
-}
-table-border-changer.table-border-color > thead > tr > th{
-    border:1px solid blue;
-}
-table-border-changer.table-border-color > tbody > tr > td{
-    border:1px solid blue;
-}
