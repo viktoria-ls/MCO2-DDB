@@ -49,12 +49,9 @@
           data-height="460"
           data-pagination="true"
           data-locale="en-US"
-          data-search="true"
           data-icons="icons"
           data-icons-prefix="icon"
           data-show-columns="true"
-          data-search-on-enter-key="true"
-          data-show-search-button="true"
           data-show-toggle="true"
           data-url="/sampleData.json">
         </table>
@@ -65,8 +62,8 @@
       <span class="fs-5 mt-5 mb-3 text-center text-decoration-underline">Concurrency Control & Consistency</span>
       <!--Buttons: Isolation Levels-->
       <select id="isolationLevel" class="form-select mb-2 w-25">
-        <option selected>Select Isolation Level</option>
-        <option value="readUncom">Read Uncommitted</option>
+        <option>Select Isolation Level</option>
+        <option value="readUncom" selected>Read Uncommitted</option>
         <option value="readCom">Read Committed</option>
         <option value="readRep">Read Repeatable</option>
         <option value="serializable">Serializable</option>
