@@ -7,6 +7,10 @@ const { mysqlConnection } = require('./controllers/DatabaseController');
 const app = express();
 
 // middleware
+app.use((req, res, next) => {
+    console.log(req.path, req.method);
+    next();
+});
 app.use(express.json());
 app.use(express.static('public'));
 app.use('/controller', express.static('controllers'));
