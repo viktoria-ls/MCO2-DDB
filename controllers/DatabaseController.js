@@ -1,6 +1,9 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
+const max_id_lt_query = `SELECT MAX(id) as id FROM movies_lt_eighty`;
+const max_id_ge_query = `SELECT MAX(id) as id FROM movies_ge_eighty`;
+
 // Establishes database connection
 const connect = async () => {
     const conn = await mysql.createConnection({
@@ -13,6 +16,13 @@ const connect = async () => {
     return conn;
 }
 
+// Gets the max id from a table in a given node
+const getMaxId = async (port, table, isolation) => {
+    var response = await fetch(`http://localhost:${port}/api/maxId/${table}/${isolation}`);
+    var jsonResponse = await response.json();
+    return jsonResponse.maxId;
+}
+
 // CRUD transactions (not directly invoked on frontend; invoked in MainController)
 const DatabaseController = {
     // Request body: {table, {fields}, isolation}
@@ -23,25 +33,64 @@ const DatabaseController = {
         if(!fields.year)  // if no movie name
             return res.status(400).json({error: "Movie year is required."});
 
-        var params = ["name", "year", "genre", "director", "rank", "actor_1", "actor_2", "actor_3"];
-        var values = [];
+        var params = [];
+        var values = Object.values(fields);
 
         // adds to values array including null values
-        params.forEach((p, index) => {
-            if(Object.keys(fields).includes(p))
-                values.push(Object.values(fields)[index]);
+        Object.keys(fields).forEach((f, index) => {
+            if(f === 'rank')
+                params.push('\`rank\`');
             else
-                values.push(null);
-        })
+                params.push(f);
+        });
 
-        var query = `INSERT INTO ${table} (name, year, genre, director, \`rank\`, actor_1, actor_2, actor_3)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        var query = `INSERT INTO ${table} (${params.join(', ') + ', id'})
+                     VALUES (${'?'.repeat(params.length + 1).split('').join(', ')})`;
 
         const connection = await connect();     // starts db connection
         await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         await connection.beginTransaction();    // starts transaction
 
         try {
+            // if in node1
+            if(process.env.nodePort == 38012) {
+                // LOCK tables
+                var [rows] = await connection.query(max_id_lt_query);
+                var max_lt_80 = rows[0].id;
+                var [rows] = await connection.query(max_id_ge_query);
+                var max_ge_80 = rows[0].id;
+            }
+    
+            // if node2
+            else if(process.env.nodePort == 38013) {
+                // LOCK tables
+                var [rows] = await connection.query(max_id_lt_query);
+                var max_lt_80 = rows[0].id;
+
+                try {
+                    var max_ge_80 = await getMaxId(38012, "movies_ge_eighty", isolation);
+                }
+                catch(err) {
+                    var max_ge_80 = await getMaxId(38014, "movies_ge_eighty", isolation);
+                }
+                
+            }
+    
+            // node3
+            else {
+                var [rows] = await connection.query(max_id_ge_query);
+                var max_ge_80 = rows[0].id;
+
+                try {
+                    var max_lt_80 = await getMaxId(38012, "movies_lt_eighty", isolation);
+                }
+                catch(err) {
+                    var max_lt_80 = await getMaxId(38013, "movies_lt_eighty", isolation);
+                }
+            }
+
+            values.push(Math.max(max_ge_80, max_lt_80) + 1);
+
             var [rows] = await connection.query(query, values);     // [rows] stores stats based on changes made to db
             await connection.commit();      // commits transaction if successful
         } catch (err) {
@@ -51,7 +100,34 @@ const DatabaseController = {
             connection.end();       // ends db connection regardless of success/fail
         }
 
-        res.status(200).json({msg: "Successfully created a new movie with id = " + rows.insertId});
+        res.status(200).json({msg: "Successfully created a new movie with id = " + values[values.length - 1]});
+    },
+
+    readOne: async (req, res) => {
+        var {table, id, isolation} = req.body;
+
+        if(id !== 0 && !id)   // id is null
+            return res.status(400).json({error: "Movie id is required."});
+
+        var query = `SELECT * FROM ${table} WHERE id=${id}`;
+
+        const connection = await connect();     // starts db connection
+        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.beginTransaction();    // starts transaction
+
+        try {
+            var [rows] = await connection.query(query);
+            await connection.commit();
+        } catch (err) {
+            await connection.rollback();
+            return res.status(500).json({error: err.message});
+        } finally {
+            connection.end();
+        }
+
+        if(rows.length === 0)
+            return res.status(404).json({error: ("No such movie found with id =  " + id)});
+        res.status(200).json({result: {...(rows[0])}});
     },
 
     // Request body: {table, id, {fields}, isolation}
@@ -120,6 +196,25 @@ const DatabaseController = {
 
         res.status(200).json({msg: ("Successfully deleted movie with id = " + id)});
     },
+
+    maxId: async (req, res) => {
+        var {table, isolation} = req.params;
+        const connection = await connect();
+        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.beginTransaction();
+
+        try {
+            var [rows] = await connection.query(`SELECT MAX(id) as id FROM ${table}`);
+            await connection.commit();
+        } catch (err) {
+            await connection.rollback();
+            return res.status(500).json({error: err.message});
+        } finally {
+            connection.end();
+        }
+
+        res.status(200).json({maxId: rows[0].id});
+    }
 }
 
 module.exports =  DatabaseController;
