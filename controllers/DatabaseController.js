@@ -14,30 +14,31 @@ const connect = async () => {
 }
 
 // CRUD transactions (not directly invoked on frontend; invoked in MainController)
-// TODO: Set Isolation Levels appropriately based on user functions for changing isolation levels
 const DatabaseController = {
+    // Request body: {table, {fields}, isolation}
     create: async (req, res) => {
-        if(!req.body.name)  // if no movie name
+        var {table, fields, isolation} = req.body;
+        if(!fields.name)  // if no movie name
             return res.status(400).json({error: "Movie name is required."});
+        if(!fields.year)  // if no movie name
+            return res.status(400).json({error: "Movie year is required."});
 
         var params = ["name", "year", "genre", "director", "rank", "actor_1", "actor_2", "actor_3"];
         var values = [];
 
-        var db_name = req.body.db_name;
-        delete req.body.db_name;
-
         // adds to values array including null values
         params.forEach((p, index) => {
-            if(Object.keys(req.body).includes(p))
-                values.push(Object.values(req.body)[index]);
+            if(Object.keys(fields).includes(p))
+                values.push(Object.values(fields)[index]);
             else
                 values.push(null);
         })
 
-        var query = `INSERT INTO ${db_name} (name, year, genre, director, \`rank\`, actor_1, actor_2, actor_3)
+        var query = `INSERT INTO ${table} (name, year, genre, director, \`rank\`, actor_1, actor_2, actor_3)
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
         const connection = await connect();     // starts db connection
+        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         await connection.beginTransaction();    // starts transaction
 
         try {
@@ -53,33 +54,32 @@ const DatabaseController = {
         res.status(200).json({msg: "Successfully created a new movie with id = " + rows.insertId});
     },
 
+    // Request body: {table, id, {fields}, isolation}
     update: async (req, res) => {
-        if(req.body.id !== 0 && !req.body.id)   // id is null
+        var {table, id, isolation, fields} = req.body;
+
+        if(id !== 0 && !id)   // id is null
             return res.status(400).json({error: "Movie id is required."});
         var setClause = [];
 
-        var db_name = req.body.db_name;
-        var id = req.body.id;
-        delete req.body.db_name;
-        delete req.body.id;
-
         // If no fields were specified in update request
-        if(Object.keys(req.body).length === 0)
+        if(!fields)
             return res.status(400).json({error: "No update parameters were set."});
 
-        Object.keys(req.body).forEach(field => {
+        Object.keys(fields).forEach(field => {
             setClause.push(field + "= (?)");
         });
 
-        var query = `UPDATE ${db_name}
+        var query = `UPDATE ${table}
                      SET ${setClause.join(', ')}
                      WHERE id = ${id}`;
 
         const connection = await connect();
+        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         await connection.beginTransaction();
 
         try {
-            var [rows] = await connection.query(query, Object.values(req.body));
+            var [rows] = await connection.query(query, Object.values(fields));
             await connection.commit();
             if(rows.affectedRows === 0)   // movie id not found
                 return res.status(404).json({error: ("No such movie found with id =  " + id)});
@@ -93,21 +93,24 @@ const DatabaseController = {
         res.status(200).json({msg: ("Successfully updated movie with id = " + id)});
     },
 
+    // Request body: {table, id, isolation}
     delete: async (req, res) => {
-        if(req.body.id !== 0 && !req.body.id) // id is null
+        var {table, id, isolation} = req.body;
+        if(id !== 0 && !id) // id is null
             return res.status(400).json({error: "Movie id is required."});
 
-        var query = `DELETE FROM ${req.body.db_name}
-                     WHERE id = ${req.body.id}`;
+        var query = `DELETE FROM ${table}
+                     WHERE id = ${id}`;
 
         const connection = await connect();
+        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         await connection.beginTransaction();
 
         try {
             var [rows] = await connection.query(query);
             await connection.commit();
             if(rows.affectedRows === 0)   // movie id not found
-                return res.status(404).json({error: ("No such movie found with id =  " + req.body.id)});
+                return res.status(404).json({error: ("No such movie found with id =  " + id)});
         } catch (err) {
             await connection.rollback();
             return res.status(500).json({error: err.message});
@@ -115,7 +118,7 @@ const DatabaseController = {
             connection.end();
         }
 
-        res.status(200).json({msg: ("Successfully deleted movie with id = " + req.body.id)});
+        res.status(200).json({msg: ("Successfully deleted movie with id = " + id)});
     },
 }
 

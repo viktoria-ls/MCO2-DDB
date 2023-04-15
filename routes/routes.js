@@ -8,6 +8,8 @@ router.get('/node1', MainController.getCentralNode);
 router.get('/node2', MainController.getNode2);
 router.get('/node3', MainController.getNode3);
 
-// /router.get()
+// API endpoints for transactions
+//router.post('/updateMovie', MainController.updateMovie);
+router.post('/deleteMovie', MainController.deleteMovie);
 
 module.exports = router;
