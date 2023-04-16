@@ -351,14 +351,15 @@ const DatabaseController = {
         // await connection.beginTransaction();
         await connection.query('SET autocommit=0');
         try {
-            await connection.query(`LOCK TABLES ${table} write;`);
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
+                await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
                 var [rows] = await connection.query(query_lt);
                 var lt_rows = rows;
             }
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
                 // LOCK TABLES
+                await connection.query(`LOCK TABLES movies_ge_eighty WRITE;`);
                 var [rows] = await connection.query(query_ge);
                 var ge_rows = rows;
             }
@@ -424,14 +425,15 @@ const DatabaseController = {
         // await connection.beginTransaction();
         await connection.query('SET autocommit=0');
         try {
-            await connection.query(`LOCK TABLES ${table} write;`);
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
+                await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
                 var [rows] = await connection.query(query_lt);
                 var lt_rows = rows;
             }
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
                 // LOCK TABLES
+                await connection.query(`LOCK TABLES movies_ge_eighty WRITE;`);
                 var [rows] = await connection.query(query_ge);
                 var ge_rows = rows;
             }
