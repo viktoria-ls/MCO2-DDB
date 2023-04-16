@@ -3,22 +3,18 @@ require('dotenv').config();
 // Sends request to appropriate node and renders page (directly invoked on frontend)
 const MainController = {
     getIndex: function(req, res) {
-        console.log("Sending index page.");
         res.render('index');
     },
 
     getCentralNode: function(req, res) {
-        console.log("Sending central node page.");
         res.render('node1');
     },
 
     getNode2: function(req, res) {
-        console.log("Sending node 2 page.");
         res.render('node2');
     },
 
     getNode3: function(req, res) {
-        console.log("Sending node 3 page.");
         res.render('node3');
     },
 
@@ -94,7 +90,35 @@ const MainController = {
 
     // Request body to send: {table, id, isolation}
     deleteMovie: async function(req, res) {
-        // TODO: Implement like in createMovie
+        if(process.env.nodePort == 38012) {     // if this is central node
+            var response = await callDelete(38012, "movies_lt_eighty", req.body);
+            if(response.status === 404)
+                var response = await callDelete(38012, "movies_ge_eighty", req.body);
+        }
+
+        else { // if this is not central node
+            var thisNodeTable = (process.env.nodePort == 38013) ? "movies_lt_eighty" : "movies_ge_eighty";
+            var response = await callDelete(process.env.nodePort, thisNodeTable, req.body);
+
+            if(response.status === 404) {       // id not found in thisNodeTable
+                try {       // try update request on central node with other table
+                    var otherTable = (thisNodeTable === "movies_lt_eighty") ? "movies_ge_eighty" : "movies_lt_eighty";
+                    var response = await callDelete(38012, otherTable, req.body);
+                }
+                catch(err) {    // central node is down, try on other node
+                    var otherNonCentralNode = (process.env.nodePort == 38013) ? 38014 : 38013;
+                    var response = await callDelete(otherNonCentralNode, otherTable, req.body);
+                }
+            }
+        }
+        
+
+        var jsonResponse = await response.json();
+
+        if(response.ok)
+            return res.redirect('/');
+        else
+            res.send(jsonResponse);
     },
 
     report1: async function(req, res) {
@@ -134,6 +158,18 @@ const callUpdate = async (port, table, body) => {
     var response = await fetch(`http://localhost:${port}/api/update`, {
         method: 'PATCH',
         body: JSON.stringify({fields: fieldsCopy, table, isolation, id}),
+        headers: {'Content-Type': 'application/json'}
+    });
+
+    return response;
+}
+
+const callDelete = async (port, table, body) => {
+    var {isolation, id} = body;
+
+    var response = await fetch(`http://localhost:${port}/api/delete`, {
+        method: 'DELETE',
+        body: JSON.stringify({table, isolation, id}),
         headers: {'Content-Type': 'application/json'}
     });
 
