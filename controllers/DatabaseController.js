@@ -312,7 +312,7 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.execute(`UNLOCK TABLES;`);
+            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -345,8 +345,75 @@ const DatabaseController = {
         var query = ``;
     },
 
+    // top 20 movies
     report3: async (req, res) => {
-        var query = ``;
+        var {isolation} = req.params;
+        var query_ge = `SELECT name, genre, ${"\`rank\`"} FROM movies_ge_eighty ORDER BY ${"\`rank\`"} DESC LIMIT 20`;
+        var query_lt = `SELECT name, genre, ${"\`rank\`"} FROM movies_lt_eighty ORDER BY ${"\`rank\`"} DESC LIMIT 20`;
+
+        const connection = await connect();
+        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        // await connection.beginTransaction();
+        await connection.execute('SET autocommit=0');
+        try {
+            await connection.execute(`LOCK TABLES ${table} write;`);
+            if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
+                // LOCK TABLES
+                var [rows] = await connection.query(query_lt);
+                var lt_rows = rows;
+            }
+            if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
+                // LOCK TABLES
+                var [rows] = await connection.query(query_ge);
+                var ge_rows = rows;
+            }
+
+            if(process.env.host == "172.16.3.113") {     // gets data from other table
+                // LOCK TABLES
+                try {
+                    var ge_rows = await getReport3("172.16.3.112", "movies_ge_eighty", isolation);
+                } catch(err) {
+                    var ge_rows = await getReport3("172.16.3.114", "movies_ge_eighty", isolation);
+                }
+            }
+            else if(process.env.host == "172.16.3.114") { // gets data from other table
+                // LOCK TABLES
+                try {
+                    var lt_rows = await getReport3("172.16.3.112", "movies_lt_eighty", isolation);
+                } catch(err) {
+                    var lt_rows = await getReport3("172.16.3.113", "movies_lt_eighty", isolation);
+                }
+            }
+
+        } catch (err) {
+            await connection.rollback();
+            return res.status(500).json({error: err.message});
+        } finally {
+            await connection.execute(`UNLOCK TABLES;`);
+            connection.end();
+        }
+
+        res.status(200).json({rows: [...ge_rows, ...lt_rows]});
+    },
+
+    report3FromNode: async (req, res) => {
+        var {table, isolation} = req.params;
+        const connection = await connect();
+        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        // await connection.beginTransaction();
+        await connection.execute('SET autocommit=0');
+        try {
+            var [rows] = await connection.query(`SELECT name, genre, ${"\`rank\`"} FROM ${table} ORDER BY ${"\`rank\`"} DESC LIMIT 20`);
+            await connection.commit();
+        } catch (err) {
+            await connection.rollback();
+            return res.status(500).json({error: err.message});
+        } finally {
+            await connection.execute(`UNLOCK TABLES;`);
+            connection.end();
+        }
+
+        res.status(200).send(rows);
     },
 
     maxId: async (req, res) => {
