@@ -14,8 +14,8 @@ router.post('/createMovie', MainController.createMovie)
 router.post('/deleteMovie', MainController.deleteMovie);
 
 // API endpoints for reports
-router.get('/report1', MainController.report1);
-router.get('/report2', MainController.report2);
-router.get('/report3', MainController.report3);
+router.get('/report1/:isolation', MainController.report1);
+router.get('/report2/:isolation', MainController.report2);
+router.get('/report3/:isolation', MainController.report3);
 
 module.exports = router;

@@ -50,9 +50,9 @@ const MainController = {
         var jsonResponse = await response.json();
 
         if(response.ok)
-            return res.redirect('/');
+            return res.send("Successfully inserted Movie #" + jsonResponse.newId);
         else
-            res.send(jsonResponse);
+            res.send(jsonResponse.error);
     },
 
     // Request body to send: {table, id, {fields}, isolation}
@@ -78,14 +78,13 @@ const MainController = {
                 }
             }
         }
-        
 
         var jsonResponse = await response.json();
 
         if(response.ok)
-            return res.redirect('/');
+            return res.send("Successfully updated Movie #" + jsonResponse.updatedId);
         else
-            res.send(jsonResponse);
+            res.send(jsonResponse.error);
     },
 
     // Request body to send: {table, id, isolation}
@@ -116,14 +115,14 @@ const MainController = {
         var jsonResponse = await response.json();
 
         if(response.ok)
-            return res.redirect('/');
+            return res.send("Successfully deleted Movie #" + req.body.id);
         else
-            res.send(jsonResponse);
+            res.send(jsonResponse.error);
     },
 
     // Number of Movies per Year
     report1: async function(req, res) {
-        var response = await fetch(`http://${process.env.host}:${process.env.nodePort}/api/report1/${req.body.isolation}`);
+        var response = await fetch(`http://${process.env.host}:${process.env.nodePort}/api/report1/${req.params.isolation}`);
         var jsonResponse = await response.json();
         return res.send(jsonResponse);
     },

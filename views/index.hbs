@@ -63,10 +63,10 @@
       <!--Buttons: Isolation Levels-->
       <select id="isolationLevel" class="form-select mb-2 w-25">
         <option>Select Isolation Level</option>
-        <option value="readUncom" selected>Read Uncommitted</option>
-        <option value="readCom">Read Committed</option>
-        <option value="readRep">Read Repeatable</option>
-        <option value="serializable">Serializable</option>
+        <option value="read uncommitted">Read Uncommitted</option>
+        <option value="read committed">Read Committed</option>
+        <option value="repeatable read">Repeatable Read</option>
+        <option value="serializable" selected>Serializable</option>
       </select>
       <div class="row">
         <div class="col-sm-6">
@@ -82,97 +82,105 @@
           </div>
         </div>
         <div class="col-sm-6">
+          
           <!--Case #2: Delete-->
-          <div class="card mb-2">
+          <div id="deleteSection" class="card mb-2">
             <div class="card-body">
               <h5 class="card-title">Delete</h5>
               <p class="card-text fs-6">Enter ID of Movie to Delete</p>
-              <input type="number" class="form-control mb-2" id="delete">
-              <p class="text-danger" id="failDeleteConcurrencyWarning"></p>
-              <a href="#" class="btn btn-primary">Delete</a>
+              <input type="number" class="form-control mb-2" id="delete" name="id">
+              <input class="isolation" type="text" name="isolation" hidden readonly>
+              <p class="text-danger" id="deleteAlert"></p>
+              <button id="deleteBtn" class="btn btn-primary">Delete</button>
             </div>
           </div>
+
         </div>
       </div>
       <div class="row">
         <div class="col-sm-6">
+
           <!--Case #2: Update-->
           <div class="card">
-            <div class="card-body">
+            <div id="updateSection" class="card-body">
               <h5 class="card-title">Update</h5>
               <p class="card-text fs-6">Update an entry of your choice by filling out all the necesarry fields (a blank field means no changes).</p>
                 <div class="form-floating my-2">
-                <input type="number" class="form-control" id="updateId" placeholder="ID" id="idfloating"></input>
+                <input name="id" type="number" class="form-control" id="updateId" placeholder="ID" id="idfloating"></input>
                 <label for="idfloating">ID of Movie to Update</label>
                 </div>
                 <div class="form-floating my-2">
-                <input type="text" class="form-control" id="updateTitle" placeholder="Title" id="titlefloating"></input>
+                <input name="name" type="text" class="form-control" id="updateTitle" placeholder="Title" id="titlefloating"></input>
                 <label for="titlefloating">Title</label>
                 </div>
-                <div class="form-floating my-2">
-                <input type="number" class="form-control" id="updateYear" placeholder="Year" id="yearfloating"></input>
+                {{!-- <div class="form-floating my-2">
+                <input name="year" type="number" class="form-control" id="updateYear" placeholder="Year" id="yearfloating"></input>
                 <label for="yearfloating">Year</label>
-                </div>
+                </div> --}}
                 <div class="form-floating my-2">
-                <input type="text" class="form-control" id="updateGenre" placeholder="Genre" id="genrefloating"></input>
+                <input name="genre" type="text" class="form-control" id="updateGenre" placeholder="Genre" id="genrefloating"></input>
                 <label for="genrefloating">Genre</label>
                 </div>
                 <div class="form-floating my-2">
-                <input type="text" class="form-control" id="updateDirector" placeholder="Director" id="directorfloating"></input>
+                <input name="director" type="text" class="form-control" id="updateDirector" placeholder="Director" id="directorfloating"></input>
                 <label for="directorfloating">Director</label>
                 </div>
                 <div class="form-floating my-2">
-                <input type="text" class="form-control" id="updateActor1" placeholder="Actor 1" id="actor1floating"></input>
+                <input name="actor_1" type="text" class="form-control" id="updateActor1" placeholder="Actor 1" id="actor1floating"></input>
                 <label for="actor1floating">Actor 1</label>
                 </div>
                 <div class="form-floating my-2">
-                <input type="text" class="form-control" id="updateActor2" placeholder="Actor 2" id="actor2floating"></input>
+                <input name="actor_2" type="text" class="form-control" id="updateActor2" placeholder="Actor 2" id="actor2floating"></input>
                 <label for="actor2floating">Actor 2</label>
                 </div>
-              <p class="text-danger" id="failUpdateConcurrencyWarning"></p>
-              <a href="#" class="btn btn-primary">Update</a>
+                <input name="isolation" type="text" class="isolation" hidden readonly>
+              <p class="text-danger" id="updateAlert"></p>
+              <button id="updateBtn" class="btn btn-primary">Update</button>
             </div>
           </div>
         </div>
+        
         <div class="col-sm-6">
+
           <!--Case #2: Insert-->
           <div class="card h-100">
-            <div class="card-body">
+            <div id="insertSection" class="card-body">
               <h5 class="card-title">Insert</h5>
-              <p class="card-text fs-6">Insert an entry by filling out all the necesarry fields (Title can't be blank).</p>
+              <p class="card-text fs-6">Insert an entry by filling out all the necesarry fields (Title and year can't be blank).</p>
                 <div class="form-floating my-2">
-                <input type="text" class="form-control" id="insertTitle" placeholder="Title" id="inserttitlefloating"></input>
+                <input name="name" type="text" class="form-control" id="insertTitle" placeholder="Title" id="inserttitlefloating" required></input>
                 <label for="inserttitlefloating">Title</label>
                 </div>
                 <div class="form-floating my-2">
-                <input type="number" class="form-control" id="insertYear" placeholder="Year" id="insertyearfloating"></input>
+                <input name="year" type="number" class="form-control" id="insertYear" placeholder="Year" id="insertyearfloating" required></input>
                 <label for="insertyearfloating">Year</label>
                 </div>
                 <div class="form-floating my-2">
-                <input type="text" class="form-control" id="insertGenre" placeholder="Genre" id="insertgenrefloating"></input>
+                <input name="genre" type="text" class="form-control" id="insertGenre" placeholder="Genre" id="insertgenrefloating"></input>
                 <label for="insertgenrefloating">Genre</label>
                 </div>
                 <div class="form-floating my-2">
-                <input type="text" class="form-control" id="insertDirector" placeholder="Director" id="insertdirectorfloating"></input>
+                <input name="director" type="text" class="form-control" id="insertDirector" placeholder="Director" id="insertdirectorfloating"></input>
                 <label for="insertdirectorfloating">Director</label>
                 </div>
                 <div class="form-floating my-2">
-                <input type="text" class="form-control" id="insertActor1" placeholder="Actor 1" id="insertactor1floating"></input>
+                <input name="actor_1" type="text" class="form-control" id="insertActor1" placeholder="Actor 1" id="insertactor1floating"></input>
                 <label for="insertactor1floating">Actor 1</label>
                 </div>
                 <div class="form-floating my-2">
-                <input type="text" class="form-control" id="insertActor2" placeholder="Actor 2" id="insertactor2floating"></input>
+                <input name="actor_2" type="text" class="form-control" id="insertActor2" placeholder="Actor 2" id="insertactor2floating"></input>
                 <label for="insertactor2floating">Actor 2</label>
                 </div>
-              <p class="text-danger" id="failInsertConcurrencyWarning"></p>
-              <a href="#" class="btn btn-primary">Insert</a>
+                <input name="isolation" type="text" class="isolation" hidden readonly>
+              <p class="text-danger" id="insertAlert"></p>
+              <button id="insertBtn" class="btn btn-primary">Insert</button>
             </div>
-          </div>
+
         </div>
       </div>
     </div>
     <!--Global Failure and Recovery: Simulation-->
-    <div class="row justify-content-center">
+    {{!-- <div class="row justify-content-center">
       <span class="fs-5 mt-5 mb-3 text-center text-decoration-underline">Global Failure and Recovery</span>
       <div class="row">
         <div class="col-sm-6">
@@ -310,7 +318,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> --}}
     <!--Reports-->
     <div class="row w-75 justify-content-center">
       <span class="fs-5 mt-5 mb-3 text-center text-decoration-underline">Generated Reports</span>
@@ -325,7 +333,7 @@
               data-height="460"
               data-pagination="true"
               data-locale="en-US"
-              data-url="/sampleData.json">
+              data-url="/report1/serializable">
               <thead>
                 <tr>
                   <th data-field="year">Year</th>
@@ -451,10 +459,17 @@
 
 
 
-    initTable()
+    initTable();
+
+    $('.isolation').val($('#isolationLevel').val());
+    $('#isolationLevel').change(function() {
+      $('.isolation').val($(this).val());
+      console.log($(this).val());
+  });
 
     //$('#locale').change(initTable)
   })
 </script>
+<script src="js/index.js"></script>
 </body>
 </html>

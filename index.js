@@ -8,9 +8,11 @@ const app = express();
 
 // middleware
 app.use((req, res, next) => {
-    console.log(req.path, req.method);
+    if(!req.path.includes("."))
+        console.log(req.path, req.method);
     next();
 });
+app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(express.static('public'));
 app.use('/controller', express.static('controllers'));
@@ -26,7 +28,6 @@ app.use('/api/', crudRoutes);
 
 // handlebars
 app.set('view engine', 'hbs');
-hbs.registerPartials(__dirname + '/views/partials');
 
 // server and database connection
 const port = process.env.port || 3000;

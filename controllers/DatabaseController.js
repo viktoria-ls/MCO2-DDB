@@ -93,7 +93,7 @@ const DatabaseController = {
             connection.end();       // ends db connection regardless of success/fail
         }
 
-        res.status(200).json({msg: "Successfully created a new movie with id = " + values[values.length - 1]});
+        res.status(200).json({msg: "Successfully created a new movie with id = " + values[values.length - 1], newId: values[values.length - 1]});
     },
 
     readOne: async (req, res) => {
@@ -159,7 +159,7 @@ const DatabaseController = {
             connection.end();
         }
 
-        res.status(200).json({msg: ("Successfully updated movie with id = " + id)});
+        res.status(200).json({msg: ("Successfully updated movie with id = " + id), updatedId: id});
     },
 
     // Request body: {table, id, isolation}
@@ -192,8 +192,8 @@ const DatabaseController = {
 
     report1: async (req, res) => {
         var {isolation} = req.params;
-        var query_ge = `SELECT year, COUNT(*) as count FROM movies_ge_eighty GROUP BY year ORDER BY 1 DESC`;
-        var query_lt = `SELECT year, COUNT(*) as count FROM movies_lt_eighty GROUP BY year ORDER BY 1 DESC`;
+        var query_ge = `SELECT year, COUNT(*) as title FROM movies_ge_eighty GROUP BY year ORDER BY 1 DESC`;
+        var query_lt = `SELECT year, COUNT(*) as title FROM movies_lt_eighty GROUP BY year ORDER BY 1 DESC`;
 
         const connection = await connect();
         await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
@@ -245,7 +245,7 @@ const DatabaseController = {
         await connection.beginTransaction();
 
         try {
-            var [rows] = await connection.query(`SELECT year, COUNT(*) as count FROM ${table} GROUP BY year ORDER BY 1 DESC`);
+            var [rows] = await connection.query(`SELECT year, COUNT(*) as title FROM ${table} GROUP BY year ORDER BY 1 DESC`);
             await connection.commit();
         } catch (err) {
             await connection.rollback();
