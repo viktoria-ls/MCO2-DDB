@@ -7,7 +7,7 @@ const max_id_ge_query = `SELECT MAX(id) as id FROM movies_ge_eighty`;
 // Establishes database connection
 const connect = async () => {
     const conn = await mysql.createConnection({
-        host: process.env.host,
+        host: process.env.temphost,
         database: process.env.database,
         user: process.env.user,
         password: process.env.password
@@ -343,22 +343,24 @@ const DatabaseController = {
 
     report2: async (req, res) => {
         var {isolation} = req.params;
-        var query_ge = `SELECT genre, ROUND(AVG(rank),2) as ${"\`rank\`"} FROM movies_ge_eighty WHERE genre IS NOT NULL group by genre order by ${"\`rank\`"} DESC`;
-        var query_lt = `SELECT genre, ROUND(AVG(rank),2) as ${"\`rank\`"} FROM movies_lt_eighty WHERE genre IS NOT NULL group by genre order by ${"\`rank\`"} DESC`;
-
+        var query_ge = 'SELECT genre, ROUND(AVG(`rank`), 2) as `rank` FROM movies_ge_eighty WHERE genre IS NOT NULL group by genre order by `rank` DESC';
+        var query_lt = 'SELECT genre, ROUND(AVG(`rank`), 2) as `rank` FROM movies_lt_eighty WHERE genre IS NOT NULL group by genre order by `rank` DESC';
+    
         const connection = await connect();
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         // await connection.beginTransaction();
         await connection.query('SET autocommit=0');
         try {
-            await connection.query(`LOCK TABLES ${table} write;`);
+            //await connection.query(`LOCK TABLES ${table} write;`);
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
+                await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
                 var [rows] = await connection.query(query_lt);
                 var lt_rows = rows;
             }
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
                 // LOCK TABLES
+                await connection.query(`LOCK TABLES movies_ge_eighty WRITE;`);
                 var [rows] = await connection.query(query_ge);
                 var ge_rows = rows;
             }
@@ -394,7 +396,7 @@ const DatabaseController = {
     report2FromNode: async (req, res) => {
         var {table, isolation} = req.params;
         const connection = await connect();
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         // await connection.beginTransaction();
         await connection.query('SET autocommit=0');
 
@@ -424,14 +426,15 @@ const DatabaseController = {
         // await connection.beginTransaction();
         await connection.query('SET autocommit=0');
         try {
-            await connection.query(`LOCK TABLES ${table} write;`);
+            //await connection.query(`LOCK TABLES ${table} write;`);
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
+                await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
                 var [rows] = await connection.query(query_lt);
                 var lt_rows = rows;
             }
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
-                // LOCK TABLES
+                await connection.query(`LOCK TABLES movies_ge_eighty WRITE;`);
                 var [rows] = await connection.query(query_ge);
                 var ge_rows = rows;
             }

@@ -188,146 +188,7 @@
         </div>
       </div>
     </div>
-    <!--Global Failure and Recovery: Simulation-->
-    {{!-- <div class="row justify-content-center">
-      <span class="fs-5 mt-5 mb-3 text-center text-decoration-underline">Global Failure and Recovery</span>
-      <div class="row">
-        <div class="col-sm-6">
-          <!--Fail: Search-->
-          <div class="card mb-2">
-            <div class="card-body">
-              <h5 class="card-title">Search</h5>
-              <p class="card-text fs-6">Search using ID, Title, Year, Genre, Director, or Actor</p>
-              <input type="search" class="form-control mb-2" id="failSearch">
-              <p class="text-danger" id="failSearchFailureWarning"></p>
-              <a href="#" class="btn btn-primary">Search</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-6">
-          <!--Fail: Delete-->
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Delete</h5>
-              <p class="card-text fs-6">Enter ID of Movie to Delete</p>
-              <input type="number" class="form-control mb-2" id="failDelete">
-              <p class="text-danger" id="failDeleteFailureWarning"></p>
-              <a href="#" class="btn btn-primary">Delete</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-sm-6">
-          <!--Fail: Update-->
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Update</h5>
-              <p class="card-text fs-6">Update an entry of your choice by filling out all the necesarry fields (a blank field means no changes).</p>
-                <div class="form-floating my-2">
-                <input type="number" class="form-control" id="failUpdateId" placeholder="ID" id="failidfloating"></input>
-                <label for="failidfloating">ID of Movie to Update</label>
-                </div>
-                <div class="form-floating my-2">
-                <input type="text" class="form-control" id="failUpdateTitle" placeholder="Title" id="failtitlefloating"></input>
-                <label for="failtitlefloating">Title</label>
-                </div>
-                <div class="form-floating my-2">
-                <input type="number" class="form-control" id="failUpdateYear" placeholder="Year" id="failyearfloating"></input>
-                <label for="failyearfloating">Year</label>
-                </div>
-                <div class="form-floating my-2">
-                <input type="text" class="form-control" id="failUpdateGenre" placeholder="Genre" id="failgenrefloating"></input>
-                <label for="failgenrefloating">Genre</label>
-                </div>
-                <div class="form-floating my-2">
-                <input type="text" class="form-control" id="failUpdateDirector" placeholder="Director" id="faildirectorfloating"></input>
-                <label for="faildirectorfloating">Director</label>
-                </div>
-                <div class="form-floating my-2">
-                <input type="text" class="form-control" id="failUpdateActor1" placeholder="Actor 1" id="failactor1floating"></input>
-                <label for="failactor1floating">Actor 1</label>
-                </div>
-                <div class="form-floating my-2">
-                <input type="text" class="form-control" id="failUpdateActor2" placeholder="Actor 2" id="failactor2floating"></input>
-                <label for="failactor2floating">Actor 2</label>
-                </div>
-              <p class="text-danger" id="failUpdateFailureWarning"></p>
-              <a href="#" class="btn btn-primary">Update</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-6">
-          <!--Fail: Insert-->
-          <div class="card h-100">
-            <div class="card-body">
-              <h5 class="card-title">Insert</h5>
-              <p class="card-text fs-6">Insert an entry by filling out all the necesarry fields (Title can't be blank).</p>
-                <div class="form-floating my-2">
-                <input type="text" class="form-control" id="failInsertTitle" placeholder="Title" id="failinserttitlefloating"></input>
-                <label for="failinserttitlefloating">Title</label>
-                </div>
-                <div class="form-floating my-2">
-                <input type="number" class="form-control" id="failInsertYear" placeholder="Year" id="failinsertyearfloating"></input>
-                <label for="failinsertyearfloating">Year</label>
-                </div>
-                <div class="form-floating my-2">
-                <input type="text" class="form-control" id="failInsertGenre" placeholder="Genre" id="failinsertgenrefloating"></input>
-                <label for="failinsertgenrefloating">Genre</label>
-                </div>
-                <div class="form-floating my-2">
-                <input type="text" class="form-control" id="failInsertDirector" placeholder="Director" id="failinsertdirectorfloating"></input>
-                <label for="failinsertdirectorfloating">Director</label>
-                </div>
-                <div class="form-floating my-2">
-                <input type="text" class="form-control" id="failInsertActor1" placeholder="Actor 1" id="failinsertactor1floating"></input>
-                <label for="failinsertactor1floating">Actor 1</label>
-                </div>
-                <div class="form-floating my-2">
-                <input type="text" class="form-control" id="failInsertActor2" placeholder="Actor 2" id="failinsertactor2floating"></input>
-                <label for="failinsertactor2floating">Actor 2</label>
-                </div>
-              <p class="text-danger" id="failInsertFailureWarning"></p>
-              <a href="#" class="btn btn-primary">Insert</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!--Buttons: Failure Cases--->
-      <div class="card my-2 w-75">
-        <div class="card-body">
-          <div class="btn-group" role="group">
-            <!--Case #1-->
-            <input type="radio" class="btn-check" name="casefailBtn" id="failCase1" autocomplete="off" checked>
-            <label class="btn btn-outline-primary" for="failCase1">Case 1: Unavailable Central Node</label>
 
-            <!--Case #2A-->
-            <input type="radio" class="btn-check" name="casefailBtn" id="failCase2A" autocomplete="off">
-            <label class="btn btn-outline-primary" for="failCase2A">Case 2A: Unavailable Node 2</label>
-
-            <!--Case #2B-->
-            <input type="radio" class="btn-check" name="casefailBtn" id="failCase2B" autocomplete="off">
-            <label class="btn btn-outline-primary" for="failCase2B">Case 2B: Unavailable Node 3</label>
-
-            <!--Case #3A-->
-            <input type="radio" class="btn-check" name="casefailBtn" id="failCase3A" autocomplete="off">
-            <label class="btn btn-outline-primary" for="failCase3A">Case 3A: Replicate from Node 2</label>
-
-            <!--Case #3B-->
-            <input type="radio" class="btn-check" name="casefailBtn" id="failCase3B" autocomplete="off">
-            <label class="btn btn-outline-primary" for="failCase3B">Case 3B: Replicate from Node 3</label>
-
-            <!--Case #4A-->
-            <input type="radio" class="btn-check" name="casefailBtn" id="failCase4A" autocomplete="off">
-            <label class="btn btn-outline-primary" for="failCase4A">Case 4A: Write to Node 2</label>
-
-            <!--Case #4B-->
-            <input type="radio" class="btn-check" name="casefailBtn" id="failCase4B" autocomplete="off">
-            <label class="btn btn-outline-primary" for="failCase4B">Case 4B: Write to Node 3</label>
-          </div>
-        </div>
-      </div>
-    </div> --}}
     <!--Reports-->
     <div class="row w-75 justify-content-center">
       <span class="fs-5 mt-5 mb-3 text-center text-decoration-underline">Generated Reports</span>
@@ -342,7 +203,7 @@
               data-height="460"
               data-pagination="true"
               data-locale="en-US"
-              data-url="/report1/serializable">
+              data-url="/report1/repeatable read">
               <thead>
                 <tr>
                   <th data-field="year">Year</th>
@@ -365,7 +226,7 @@
               data-height="460"
               data-pagination="true"
               data-locale="en-US"
-              data-url="/report2/serializable">
+              data-url="/report2/repeatable read">
               <thead>
                 <tr>
                   <th data-field="genre">Genre</th>
@@ -390,12 +251,11 @@
               data-height="460"
               data-pagination="true"
               data-locale="en-US"
-              data-url="/report3/serializable">
+              data-url="/report3/repeatable read">
               <thead>
                 <tr>
                   <th data-field="name">Title</th>
-                  <!--TODO: Change this field-->
-                  <th data-field="rank">Top 20</th>
+                  <th data-field="rank">Rank</th>
                 </tr>
               </thead>
             </table>
