@@ -192,15 +192,34 @@ const DatabaseController = {
 
     report1: async (req, res) => {
         var {isolation} = req.body;
-        var query_lt = `SELECT year, COUNT(*) as count FROM movies_lt_eighty GROUP BY year ORDER BY 1 DESC`;
         var query_ge = `SELECT year, COUNT(*) as count FROM movies_ge_eighty GROUP BY year ORDER BY 1 DESC`;
+        var query_lt = `SELECT year, COUNT(*) as count FROM movies_lt_eighty GROUP BY year ORDER BY 1 DESC`;
 
         const connection = await connect();
         await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         await connection.beginTransaction();
 
         try {
-            
+            if(process.env.nodePort == 38012 || process.env.nodePort == 38013) {     // if this is node1 or node2
+                // LOCK TABLES
+                var [rows] = await connection.query(query_lt);
+                var lt_rows = rows;
+            }
+            else if(process.env.nodePort == 38012 || process.env.nodePort == 38014) {   // if this is node1 or node3
+                // LOCK TABLES
+                var [rows] = await connection.query(query_ge);
+                var ge_rows = rows;
+            }
+
+            if(process.env.nodePort == 38013) {     // gets data from other table
+                // LOCK TABLES
+                var ge_rows = await getReport1(38014, "movies_ge_eighty");
+            }
+            else if(process.env.nodePort == 38014) { // gets data from other table
+                // LOCK TABLES
+                var lt_rows = await getReport1(38013, "movies_lt_eighty");
+            }
+
         } catch (err) {
             await connection.rollback();
             return res.status(500).json({error: err.message});
@@ -208,7 +227,26 @@ const DatabaseController = {
             connection.end();
         }
 
-        res.status(200).json({msg: ("Successfully deleted movie with id = " + id)});
+        res.status(200).json({...ge_rows, ...lt_rows});
+    },
+
+    report1FromNode: async (req, res) => {
+        var {table, isolation} = req.params;
+        const connection = await connect();
+        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.beginTransaction();
+
+        try {
+            var [rows] = await connection.query(`SELECT year, COUNT(*) as count FROM ${table} GROUP BY year ORDER BY 1 DESC`);
+            await connection.commit();
+        } catch (err) {
+            await connection.rollback();
+            return res.status(500).json({error: err.message});
+        } finally {
+            connection.end();
+        }
+
+        res.status(200).json({rows});
     },
 
     report2: async (req, res) => {
