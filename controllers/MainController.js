@@ -123,8 +123,9 @@ const MainController = {
 
     // Number of Movies per Year
     report1: async function(req, res) {
-        // Get number of movies per year for each table, descending order
-        // concatenate results
+        var response = await fetch(`http://${process.env.host}:${process.env.nodePort}/api/report1/${req.body.isolation}`);
+        var jsonResponse = await response.json();
+        return res.send(jsonResponse);
     },
 
     // Average rank of all Movies under each Genre
@@ -144,7 +145,7 @@ const callCreate = async (port, table, body) => {
     var {isolation} = fieldsCopy;
     delete fieldsCopy.isolation;
 
-    var response = await fetch(`http://localhost:${port}/api/create`, {
+    var response = await fetch(`http://${process.env.host}:${port}/api/create`, {
         method: 'POST',
         body: JSON.stringify({fields: fieldsCopy, table, isolation}),
         headers: {'Content-Type': 'application/json'}
@@ -160,7 +161,7 @@ const callUpdate = async (port, table, body) => {
     delete fieldsCopy.isolation;
     delete fieldsCopy.id;
 
-    var response = await fetch(`http://localhost:${port}/api/update`, {
+    var response = await fetch(`http://${process.env.host}:${port}/api/update`, {
         method: 'PATCH',
         body: JSON.stringify({fields: fieldsCopy, table, isolation, id}),
         headers: {'Content-Type': 'application/json'}
@@ -173,7 +174,7 @@ const callUpdate = async (port, table, body) => {
 const callDelete = async (port, table, body) => {
     var {isolation, id} = body;
 
-    var response = await fetch(`http://localhost:${port}/api/delete`, {
+    var response = await fetch(`http://${process.env.host}:${port}/api/delete`, {
         method: 'DELETE',
         body: JSON.stringify({table, isolation, id}),
         headers: {'Content-Type': 'application/json'}

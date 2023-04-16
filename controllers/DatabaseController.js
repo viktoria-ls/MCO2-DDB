@@ -191,7 +191,7 @@ const DatabaseController = {
     },
 
     report1: async (req, res) => {
-        var {isolation} = req.body;
+        var {isolation} = req.params;
         var query_ge = `SELECT year, COUNT(*) as count FROM movies_ge_eighty GROUP BY year ORDER BY 1 DESC`;
         var query_lt = `SELECT year, COUNT(*) as count FROM movies_lt_eighty GROUP BY year ORDER BY 1 DESC`;
 
@@ -205,7 +205,7 @@ const DatabaseController = {
                 var [rows] = await connection.query(query_lt);
                 var lt_rows = rows;
             }
-            else if(process.env.nodePort == 38012 || process.env.nodePort == 38014) {   // if this is node1 or node3
+            if(process.env.nodePort == 38012 || process.env.nodePort == 38014) {   // if this is node1 or node3
                 // LOCK TABLES
                 var [rows] = await connection.query(query_ge);
                 var ge_rows = rows;
@@ -213,11 +213,19 @@ const DatabaseController = {
 
             if(process.env.nodePort == 38013) {     // gets data from other table
                 // LOCK TABLES
-                var ge_rows = await getReport1(38014, "movies_ge_eighty");
+                try {
+                    var ge_rows = await getReport1(38012, "movies_ge_eighty", isolation);
+                } catch(err) {
+                    var ge_rows = await getReport1(38014, "movies_ge_eighty", isolation);
+                }
             }
             else if(process.env.nodePort == 38014) { // gets data from other table
                 // LOCK TABLES
-                var lt_rows = await getReport1(38013, "movies_lt_eighty");
+                try {
+                    var lt_rows = await getReport1(38012, "movies_lt_eighty", isolation);
+                } catch(err) {
+                    var lt_rows = await getReport1(38013, "movies_lt_eighty", isolation);
+                }
             }
 
         } catch (err) {
@@ -227,7 +235,7 @@ const DatabaseController = {
             connection.end();
         }
 
-        res.status(200).json({...ge_rows, ...lt_rows});
+        res.status(200).json({rows: [...ge_rows, ...lt_rows]});
     },
 
     report1FromNode: async (req, res) => {
@@ -246,7 +254,7 @@ const DatabaseController = {
             connection.end();
         }
 
-        res.status(200).json({rows});
+        res.status(200).send(rows);
     },
 
     report2: async (req, res) => {
@@ -279,14 +287,14 @@ const DatabaseController = {
 
 // Gets the max id from a table in a given node
 const getMaxId = async (port, table, isolation) => {
-    var response = await fetch(`http://localhost:${port}/api/maxId/${table}/${isolation}`);
+    var response = await fetch(`http://${process.env.host}:${port}/api/maxId/${table}/${isolation}`);
     var jsonResponse = await response.json();
     return jsonResponse.maxId;
 }
 
 // Gets report 1 data from a table in a given node
 const getReport1 = async (port, table, isolation) => {
-    var response = await fetch(`http://localhost:${port}/api/report1/${table}/${isolation}`);
+    var response = await fetch(`http://${process.env.host}:${port}/api/report1/${table}/${isolation}`);
     var jsonResponse = await response.json();
     return jsonResponse;
 }
