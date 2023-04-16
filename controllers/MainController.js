@@ -137,11 +137,17 @@ const MainController = {
     // Average rank of all Movies under each Genre
     report2: async function(req, res) {
         // TODO
+        var response = await fetch(`http://${process.env.host}:${process.env.nodePort}/api/report2/${req.params.isolation}`);
+        var jsonResponse = await response.json();
+        return res.send(jsonResponse);
     },
 
     // Top 20 highest ranking Movies for each Genre
     report3: async function(req, res) {
         // TODO
+        var response = await fetch(`http://${process.env.host}:${process.env.nodePort}/api/report3/${req.params.isolation}`);
+        var jsonResponse = await response.json();
+        return res.send(jsonResponse);
     },
 }
 
