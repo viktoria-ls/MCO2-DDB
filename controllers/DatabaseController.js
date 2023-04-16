@@ -42,14 +42,11 @@ const DatabaseController = {
 
         const connection = await connect();     // starts db connection
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        await connection.query('SET autocommit=0;');
-        //await connection.beginTransaction();    // starts transaction
+        await connection.beginTransaction();    // starts transaction
         try {
             // if in node1
             if(process.env.host == "172.16.3.112") {
                 // LOCK tables
-                await connection.query(`LOCK TABLES movies_lt_eighty WRITE, movies_lt_eighty AS t1 READ;`);
-                await connection.query(`LOCK TABLES movies_ge_eighty WRITE, movies_ge_eighty AS t2 READ;`);
                 var [rows] = await connection.query(max_id_lt_query);
                 var max_lt_80 = rows[0].id;
                 var [rows] = await connection.query(max_id_ge_query);
@@ -59,7 +56,6 @@ const DatabaseController = {
             // if node2
             else if(process.env.host == "172.16.3.113") {
                 // LOCK tables
-                await connection.query(`LOCK TABLES movies_lt_eighty WRITE, movies_lt_eighty AS t1 READ;`);
                 var [rows] = await connection.query(max_id_lt_query);
                 var max_lt_80 = rows[0].id;
 
@@ -75,7 +71,6 @@ const DatabaseController = {
     
             // node3
             else {
-                await connection.query(`LOCK TABLES movies_ge_eighty WRITE, movies_ge_eighty AS t2 READ;`);
                 var [rows] = await connection.query(max_id_ge_query);
                 var max_ge_80 = rows[0].id;
 
@@ -95,7 +90,6 @@ const DatabaseController = {
             await connection.rollback();    // rolls back if error occurred
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();       // ends db connection regardless of success/fail
         }
 
@@ -124,11 +118,9 @@ const DatabaseController = {
 
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        // await connection.beginTransaction();
-        await connection.query('SET autocommit=0;');
+        await connection.beginTransaction();
 
         try {
-            await connection.query(`LOCK TABLES ${table} write;`);
             var [rows] = await connection.query(query, Object.values(fields));
             await connection.query("DO SLEEP(10);");
             await connection.commit();
@@ -138,7 +130,6 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -160,18 +151,15 @@ const DatabaseController = {
 
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        // await connection.beginTransaction();
-        await connection.query('SET autocommit=0;');
+        await connection.beginTransaction();
         try {
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
-                await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
                 var [rows] = await connection.query(select + "movies_lt_eighty" + query);
                 var lt_rows = rows;
             }
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
                 // LOCK TABLES
-                await connection.query(`LOCK TABLES movies_ge_eighty WRITE;`);
                 var [rows] = await connection.query(select + "movies_ge_eighty" + query);
                 var ge_rows = rows;
             }
@@ -197,7 +185,6 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -208,8 +195,7 @@ const DatabaseController = {
         var {table, isolation, searchQuery} = req.params;
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        // await connection.beginTransaction();
-        await connection.query('SET autocommit=0;');
+        await connection.beginTransaction();
 
         var query = `SELECT * FROM ${table}
                      WHERE name LIKE '%${searchQuery}%'
@@ -222,7 +208,6 @@ const DatabaseController = {
                      OR actor_2 LIKE '%${searchQuery}%'`;
 
         try {
-            await connection.query(`LOCK TABLES ${table} write;`);
             var [rows] = await connection.query(query);
             await connection.commit();
         } catch (err) {
@@ -230,7 +215,6 @@ const DatabaseController = {
             
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -248,11 +232,9 @@ const DatabaseController = {
 
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        // await connection.beginTransaction();
-        await connection.query('SET autocommit=0;');
+        await connection.beginTransaction();
 
         try {
-            await connection.query(`LOCK TABLES ${table} WRITE, ${table} AS t1 READ;`);
             var [rows] = await connection.query(query);
             await connection.commit();
             if(rows.affectedRows === 0)   // movie id not found
@@ -261,7 +243,6 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -275,19 +256,16 @@ const DatabaseController = {
 
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        // await connection.beginTransaction();
-        await connection.query('SET autocommit=0');
+        await connection.beginTransaction();
 
         try {
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
-                await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
                 var [rows] = await connection.query(query_lt);
                 var lt_rows = rows;
             }
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
                 // LOCK TABLES
-                await connection.query(`LOCK TABLES movies_ge_eighty WRITE;`);
                 var [rows] = await connection.query(query_ge);
                 var ge_rows = rows;
             }
@@ -313,7 +291,6 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -324,18 +301,15 @@ const DatabaseController = {
         var {table, isolation} = req.params;
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        // await connection.beginTransaction();
-        await connection.query('SET autocommit=0');
+        await connection.beginTransaction();
 
         try {
-            await connection.query(`LOCK TABLES ${table} write;`);
             var [rows] = await connection.query(`SELECT year, COUNT(*) as title FROM ${table} GROUP BY year ORDER BY 1 DESC`);
             await connection.commit();
         } catch (err) {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -349,18 +323,15 @@ const DatabaseController = {
 
         const connection = await connect();
         await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        // await connection.beginTransaction();
-        await connection.query('SET autocommit=0');
+        await connection.beginTransaction();
         try {
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
-                await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
                 var [rows] = await connection.query(query_lt);
                 var lt_rows = rows;
             }
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
                 // LOCK TABLES
-                await connection.query(`LOCK TABLES movies_ge_eighty WRITE;`);
                 var [rows] = await connection.query(query_ge);
                 var ge_rows = rows;
             }
@@ -386,7 +357,6 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -397,18 +367,15 @@ const DatabaseController = {
         var {table, isolation} = req.params;
         const connection = await connect();
         await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        // await connection.beginTransaction();
-        await connection.query('SET autocommit=0');
+        await connection.beginTransaction();
 
         try {
-            await connection.query(`LOCK TABLES ${table} write;`);
             var [rows] = await connection.query(`SELECT genre, ROUND(AVG(rank),2) as ${"\`rank\`"} FROM ${table} WHERE genre IS NOT NULL group by genre order by ${"\`rank\`"} DESC`);
             await connection.commit();
         } catch (err) {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -423,18 +390,15 @@ const DatabaseController = {
 
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        // await connection.beginTransaction();
-        await connection.query('SET autocommit=0');
+        await connection.beginTransaction();
         try {
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
-                await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
                 var [rows] = await connection.query(query_lt);
                 var lt_rows = rows;
             }
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
                 // LOCK TABLES
-                await connection.query(`LOCK TABLES movies_ge_eighty WRITE;`);
                 var [rows] = await connection.query(query_ge);
                 var ge_rows = rows;
             }
@@ -460,7 +424,6 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -471,17 +434,14 @@ const DatabaseController = {
         var {table, isolation} = req.params;
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        // await connection.beginTransaction();
-        await connection.query('SET autocommit=0');
+        await connection.beginTransaction();
         try {
-            await connection.query(`LOCK TABLES ${table} write;`);
             var [rows] = await connection.query(`SELECT name, genre, ${"\`rank\`"} FROM ${table} ORDER BY ${"\`rank\`"} DESC LIMIT 20`);
             await connection.commit();
         } catch (err) {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -492,18 +452,15 @@ const DatabaseController = {
         var {table, isolation} = req.params;
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        //await connection.beginTransaction();
-        await connection.query('SET autocommit=0');
+        await connection.beginTransaction();
 
         try {
-            await connection.query(`LOCK TABLES ${table} write;`);
             var [rows] = await connection.query(`SELECT MAX(id) as id FROM ${table}`);
             await connection.commit();
         } catch (err) {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
