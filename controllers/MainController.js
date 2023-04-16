@@ -61,65 +61,40 @@ const MainController = {
 
     // Request body to send: {table, id, {fields}, isolation}
     updateMovie: async function(req, res) {
-        //TODO
+        if(process.env.nodePort == 38012) {     // if this is central node
+            var response = await callUpdate(38012, "movies_lt_eighty", req.body);
+            if(response.status === 404)
+                var response = await callUpdate(38012, "movies_ge_eighty", req.body);
+        }
+
+        else { // if this is not central node
+            var thisNodeTable = (process.env.nodePort == 38013) ? "movies_lt_eighty" : "movies_ge_eighty";
+            var response = await callUpdate(process.env.nodePort, thisNodeTable, req.body);
+
+            if(response.status === 404) {       // id not found in thisNodeTable
+                try {       // try update request on central node with other table
+                    var otherTable = (thisNodeTable === "movies_lt_eighty") ? "movies_ge_eighty" : "movies_lt_eighty";
+                    var response = await callUpdate(38012, otherTable, req.body);
+                }
+                catch(err) {    // central node is down, try on other node
+                    var otherNonCentralNode = (process.env.nodePort == 38013) ? 38014 : 38013;
+                    var response = await callUpdate(otherNonCentralNode, otherTable, req.body);
+                }
+            }
+        }
+        
+
+        var jsonResponse = await response.json();
+
+        if(response.ok)
+            return res.redirect('/');
+        else
+            res.send(jsonResponse);
     },
 
     // Request body to send: {table, id, isolation}
     deleteMovie: async function(req, res) {
         // TODO: Implement like in createMovie
-        // tries to delete from movies_lt_eighty and checks if central node is running
-        try {
-            var response_lt_80 = await fetch('http://localhost:38012/api/delete', {
-                method: 'DELETE',
-                body: JSON.stringify({...req.body, table: "movies_lt_eighty"}),
-                headers: {'Content-Type': 'application/json'}
-            });
-        }
-        catch(error) {
-            // Central node is down
-            console.log("Central node down");
-            
-
-            return res.redirect('/');
-        }
-        
-
-        // found in movies_lt_eighty
-        if(response_lt_80.ok) {
-            // delete from movies_normalized
-            await fetch('http://localhost:38012/api/delete', {
-                method: 'DELETE',
-                body: JSON.stringify({...req.body, table: "movies_normalized"}),
-                headers: {'Content-Type': 'application/json'}
-            });
-            return res.redirect('/');
-        }
-        
-        // movie id not found in movies_lt_eighty
-        if(response_lt_80.status === 404) {
-            // tries to delete from movies_lt_eighty
-            var response_ge_80 = await fetch('http://localhost:38012/api/delete', {
-                method: 'DELETE',
-                body: JSON.stringify({...req.body, table: "movies_ge_eighty"}),
-                headers: {'Content-Type': 'application/json'}
-            });
-
-            var json = await response_ge_80.json()
-
-            // found in movies_lt_eighty
-            if(response_ge_80.ok) {
-                // delete from movies_normalized
-                await fetch('http://localhost:38012/api/delete', {
-                    method: 'DELETE',
-                    body: JSON.stringify({...req.body, table: "movies_normalized"}),
-                    headers: {'Content-Type': 'application/json'}
-                });
-                return res.redirect('/');
-            }
-            // error
-            else
-                res.send(json);
-        }
     },
 
     report1: async function(req, res) {
@@ -136,16 +111,29 @@ const MainController = {
 }
 
 // Used to insert to a table on a given port
-const callCreate = async (port, table, fields) => {
-    var fieldsCopy = {...fields};
+const callCreate = async (port, table, body) => {
+    var fieldsCopy = {...body};
     var {isolation} = fieldsCopy;
     delete fieldsCopy.isolation;
-
-    console.log("in callCreate");
 
     var response = await fetch(`http://localhost:${port}/api/create`, {
         method: 'POST',
         body: JSON.stringify({fields: fieldsCopy, table, isolation}),
+        headers: {'Content-Type': 'application/json'}
+    });
+
+    return response;
+}
+
+const callUpdate = async (port, table, body) => {
+    var fieldsCopy = {...body};
+    var {isolation, id} = fieldsCopy;
+    delete fieldsCopy.isolation;
+    delete fieldsCopy.id;
+
+    var response = await fetch(`http://localhost:${port}/api/update`, {
+        method: 'PATCH',
+        body: JSON.stringify({fields: fieldsCopy, table, isolation, id}),
         headers: {'Content-Type': 'application/json'}
     });
 
