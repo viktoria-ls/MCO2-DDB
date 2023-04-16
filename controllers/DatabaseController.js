@@ -85,6 +85,7 @@ const DatabaseController = {
             values.push(Math.max(max_ge_80, max_lt_80) + 1);
 
             var [rows] = await connection.query(query, values);     // [rows] stores stats based on changes made to db
+            await connection.query("DO SLEEP(10);");
             await connection.commit();      // commits transaction if successful
         } catch (err) {
             await connection.rollback();    // rolls back if error occurred
@@ -236,6 +237,7 @@ const DatabaseController = {
 
         try {
             var [rows] = await connection.query(query);
+            await connection.query("DO SLEEP(10);");
             await connection.commit();
             if(rows.affectedRows === 0)   // movie id not found
                 return res.status(404).json({error: ("No such movie found with id =  " + id)});
