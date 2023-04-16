@@ -95,7 +95,7 @@ const DatabaseController = {
             await connection.rollback();    // rolls back if error occurred
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.execute(`UNLOCK TABLES;`);
+            await connection.query(`UNLOCK TABLES;`);
             connection.end();       // ends db connection regardless of success/fail
         }
 
@@ -137,7 +137,7 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.execute(`UNLOCK TABLES;`);
+            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -196,7 +196,7 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.execute(`UNLOCK TABLES;`);
+            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -229,7 +229,7 @@ const DatabaseController = {
             
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.execute(`UNLOCK TABLES;`);
+            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -260,7 +260,7 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.execute(`UNLOCK TABLES;`);
+            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -334,7 +334,7 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.execute(`UNLOCK TABLES;`);
+            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -389,7 +389,7 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.execute(`UNLOCK TABLES;`);
+            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -409,7 +409,7 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.execute(`UNLOCK TABLES;`);
+            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
@@ -431,7 +431,7 @@ const DatabaseController = {
             await connection.rollback();
             return res.status(500).json({error: err.message});
         } finally {
-            await connection.execute(`UNLOCK TABLES;`);
+            await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
 
