@@ -343,15 +343,15 @@ const DatabaseController = {
 
     report2: async (req, res) => {
         var {isolation} = req.params;
-        var query_ge = 'SELECT genre, ROUND(AVG(`rank`), 2) as `rank` FROM movies_ge_eighty WHERE genre IS NOT NULL group by genre order by `rank` DESC';
-        var query_lt = 'SELECT genre, ROUND(AVG(`rank`), 2) as `rank` FROM movies_lt_eighty WHERE genre IS NOT NULL group by genre order by `rank` DESC';
-    
+        var query_ge = `SELECT year, COUNT(*) as title FROM movies_ge_eighty GROUP BY year ORDER BY 1 DESC`;
+        var query_lt = `SELECT year, COUNT(*) as title FROM movies_lt_eighty GROUP BY year ORDER BY 1 DESC`;
+
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         // await connection.beginTransaction();
         await connection.query('SET autocommit=0');
+
         try {
-            //await connection.query(`LOCK TABLES ${table} write;`);
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
                 await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
@@ -368,17 +368,17 @@ const DatabaseController = {
             if(process.env.host == "172.16.3.113") {     // gets data from other table
                 // LOCK TABLES
                 try {
-                    var ge_rows = await getReport2("172.16.3.112", "movies_ge_eighty", isolation);
+                    var ge_rows = await getReport1("172.16.3.112", "movies_ge_eighty", isolation);
                 } catch(err) {
-                    var ge_rows = await getReport2("172.16.3.114", "movies_ge_eighty", isolation);
+                    var ge_rows = await getReport1("172.16.3.114", "movies_ge_eighty", isolation);
                 }
             }
             else if(process.env.host == "172.16.3.114") { // gets data from other table
                 // LOCK TABLES
                 try {
-                    var lt_rows = await getReport2("172.16.3.112", "movies_lt_eighty", isolation);
+                    var lt_rows = await getReport1("172.16.3.112", "movies_lt_eighty", isolation);
                 } catch(err) {
-                    var lt_rows = await getReport2("172.16.3.113", "movies_lt_eighty", isolation);
+                    var lt_rows = await getReport1("172.16.3.113", "movies_lt_eighty", isolation);
                 }
             }
 
