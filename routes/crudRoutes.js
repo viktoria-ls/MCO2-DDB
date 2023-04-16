@@ -18,6 +18,9 @@ router.get('/report1/:isolation', DatabaseController.report1);
 router.get('/report1/:table/:isolation', DatabaseController.report1FromNode);
 
 router.get('/report2/:table/:isolation', DatabaseController.report2);
+router.get('/report2/:table/:isolation', DatabaseController.report2FromNode);
+
 router.get('/report3/:table/:isolation', DatabaseController.report3);
+router.get('/report3/:table/:isolation', DatabaseController.report3FromNode);
 
 module.exports = router;
