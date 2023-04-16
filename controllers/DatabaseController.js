@@ -41,15 +41,15 @@ const DatabaseController = {
                      VALUES (${'?'.repeat(params.length + 1).split('').join(', ')})`;
 
         const connection = await connect();     // starts db connection
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        await connection.execute('SET autocommit=0;');
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query('SET autocommit=0;');
         //await connection.beginTransaction();    // starts transaction
         try {
             // if in node1
             if(process.env.host == "172.16.3.112") {
                 // LOCK tables
-                await connection.execute(`LOCK TABLES movies_lt_eighty WRITE, movies_lt_eighty AS t1 READ;`);
-                await connection.execute(`LOCK TABLES movies_ge_eighty WRITE, movies_ge_eighty AS t2 READ;`);
+                await connection.query(`LOCK TABLES movies_lt_eighty WRITE, movies_lt_eighty AS t1 READ;`);
+                await connection.query(`LOCK TABLES movies_ge_eighty WRITE, movies_ge_eighty AS t2 READ;`);
                 var [rows] = await connection.query(max_id_lt_query);
                 var max_lt_80 = rows[0].id;
                 var [rows] = await connection.query(max_id_ge_query);
@@ -59,7 +59,7 @@ const DatabaseController = {
             // if node2
             else if(process.env.host == "172.16.3.113") {
                 // LOCK tables
-                await connection.execute(`LOCK TABLES movies_lt_eighty WRITE, movies_lt_eighty AS t1 READ;`);
+                await connection.query(`LOCK TABLES movies_lt_eighty WRITE, movies_lt_eighty AS t1 READ;`);
                 var [rows] = await connection.query(max_id_lt_query);
                 var max_lt_80 = rows[0].id;
 
@@ -75,7 +75,7 @@ const DatabaseController = {
     
             // node3
             else {
-                await connection.execute(`LOCK TABLES movies_ge_eighty WRITE, movies_ge_eighty AS t2 READ;`);
+                await connection.query(`LOCK TABLES movies_ge_eighty WRITE, movies_ge_eighty AS t2 READ;`);
                 var [rows] = await connection.query(max_id_ge_query);
                 var max_ge_80 = rows[0].id;
 
@@ -123,12 +123,12 @@ const DatabaseController = {
                      WHERE id = ${id}`;
 
         const connection = await connect();
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         // await connection.beginTransaction();
-        await connection.execute('SET autocommit=0;');
+        await connection.query('SET autocommit=0;');
 
         try {
-            await connection.execute(`LOCK TABLES ${table} write;`);
+            await connection.query(`LOCK TABLES ${table} write;`);
             var [rows] = await connection.query(query, Object.values(fields));
             await connection.commit();
             if(rows.affectedRows === 0)   // movie id not found
@@ -158,19 +158,19 @@ const DatabaseController = {
                      OR actor_2 LIKE '%${searchQuery}%'`;
 
         const connection = await connect();
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         // await connection.beginTransaction();
-        await connection.execute('SET autocommit=0;');
+        await connection.query('SET autocommit=0;');
         try {
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
-                await connection.execute(`LOCK TABLES movies_lt_eighty WRITE;`);
+                await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
                 var [rows] = await connection.query(select + "movies_lt_eighty" + query);
                 var lt_rows = rows;
             }
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
                 // LOCK TABLES
-                await connection.execute(`LOCK TABLES movies_ge_eighty WRITE;`);
+                await connection.query(`LOCK TABLES movies_ge_eighty WRITE;`);
                 var [rows] = await connection.query(select + "movies_ge_eighty" + query);
                 var ge_rows = rows;
             }
@@ -206,9 +206,9 @@ const DatabaseController = {
     searchFromNode: async (req, res) => {
         var {table, isolation, searchQuery} = req.params;
         const connection = await connect();
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         // await connection.beginTransaction();
-        await connection.execute('SET autocommit=0;');
+        await connection.query('SET autocommit=0;');
 
         var query = `SELECT * FROM ${table}
                      WHERE name LIKE '%${searchQuery}%'
@@ -221,7 +221,7 @@ const DatabaseController = {
                      OR actor_2 LIKE '%${searchQuery}%'`;
 
         try {
-            await connection.execute(`LOCK TABLES ${table} write;`);
+            await connection.query(`LOCK TABLES ${table} write;`);
             var [rows] = await connection.query(query);
             await connection.commit();
         } catch (err) {
@@ -246,12 +246,12 @@ const DatabaseController = {
                      WHERE id = ${id}`;
 
         const connection = await connect();
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         // await connection.beginTransaction();
-        await connection.execute('SET autocommit=0;');
+        await connection.query('SET autocommit=0;');
 
         try {
-            await connection.execute(`LOCK TABLES ${table} WRITE, ${table} AS t1 READ;`);
+            await connection.query(`LOCK TABLES ${table} WRITE, ${table} AS t1 READ;`);
             var [rows] = await connection.query(query);
             await connection.commit();
             if(rows.affectedRows === 0)   // movie id not found
@@ -273,20 +273,20 @@ const DatabaseController = {
         var query_lt = `SELECT year, COUNT(*) as title FROM movies_lt_eighty GROUP BY year ORDER BY 1 DESC`;
 
         const connection = await connect();
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         // await connection.beginTransaction();
-        await connection.execute('SET autocommit=0');
+        await connection.query('SET autocommit=0');
 
         try {
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
-                await connection.execute(`LOCK TABLES movies_lt_eighty WRITE;`);
+                await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
                 var [rows] = await connection.query(query_lt);
                 var lt_rows = rows;
             }
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
                 // LOCK TABLES
-                await connection.execute(`LOCK TABLES movies_ge_eighty WRITE;`);
+                await connection.query(`LOCK TABLES movies_ge_eighty WRITE;`);
                 var [rows] = await connection.query(query_ge);
                 var ge_rows = rows;
             }
@@ -322,12 +322,12 @@ const DatabaseController = {
     report1FromNode: async (req, res) => {
         var {table, isolation} = req.params;
         const connection = await connect();
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         // await connection.beginTransaction();
-        await connection.execute('SET autocommit=0');
+        await connection.query('SET autocommit=0');
 
         try {
-            await connection.execute(`LOCK TABLES ${table} write;`);
+            await connection.query(`LOCK TABLES ${table} write;`);
             var [rows] = await connection.query(`SELECT year, COUNT(*) as title FROM ${table} GROUP BY year ORDER BY 1 DESC`);
             await connection.commit();
         } catch (err) {
@@ -352,11 +352,11 @@ const DatabaseController = {
         var query_lt = `SELECT name, genre, ${"\`rank\`"} FROM movies_lt_eighty ORDER BY ${"\`rank\`"} DESC LIMIT 20`;
 
         const connection = await connect();
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         // await connection.beginTransaction();
-        await connection.execute('SET autocommit=0');
+        await connection.query('SET autocommit=0');
         try {
-            await connection.execute(`LOCK TABLES ${table} write;`);
+            await connection.query(`LOCK TABLES ${table} write;`);
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
                 var [rows] = await connection.query(query_lt);
@@ -399,9 +399,9 @@ const DatabaseController = {
     report3FromNode: async (req, res) => {
         var {table, isolation} = req.params;
         const connection = await connect();
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         // await connection.beginTransaction();
-        await connection.execute('SET autocommit=0');
+        await connection.query('SET autocommit=0');
         try {
             var [rows] = await connection.query(`SELECT name, genre, ${"\`rank\`"} FROM ${table} ORDER BY ${"\`rank\`"} DESC LIMIT 20`);
             await connection.commit();
@@ -419,12 +419,12 @@ const DatabaseController = {
     maxId: async (req, res) => {
         var {table, isolation} = req.params;
         const connection = await connect();
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
         //await connection.beginTransaction();
-        await connection.execute('SET autocommit=0');
+        await connection.query('SET autocommit=0');
 
         try {
-            await connection.execute(`LOCK TABLES ${table} write;`);
+            await connection.query(`LOCK TABLES ${table} write;`);
             var [rows] = await connection.query(`SELECT MAX(id) as id FROM ${table}`);
             await connection.commit();
         } catch (err) {
