@@ -318,8 +318,8 @@ const DatabaseController = {
     // average rank per genre
     report2: async (req, res) => {
         var {isolation} = req.params;
-        var query_ge = `SELECT genre, ROUND(AVG(rank),2) as 'Rank' FROM movies_ge_eighty WHERE genre IS NOT NULL group by genre order by ROUND(AVG(rank),2) DESC`;
-        var query_lt = `SELECT genre, ROUND(AVG(rank),2) as 'Rank' FROM movies_lt_eighty WHERE genre IS NOT NULL group by genre order by ROUND(AVG(rank),2) DESC`;
+        var query_ge = `SELECT genre, ROUND(AVG(rank),2) as ${"\`rank\`"} FROM movies_ge_eighty WHERE genre IS NOT NULL group by genre order by ${"\`rank\`"} DESC`;
+        var query_lt = `SELECT genre, ROUND(AVG(rank),2) as ${"\`rank\`"} FROM movies_lt_eighty WHERE genre IS NOT NULL group by genre order by ${"\`rank\`"} DESC`;
 
         const connection = await connect();
         await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
@@ -371,7 +371,7 @@ const DatabaseController = {
         await connection.beginTransaction();
 
         try {
-            var [rows] = await connection.query(`SELECT genre, ROUND(AVG(rank),2) as 'Rank' FROM ${table} WHERE genre IS NOT NULL group by genre order by ROUND(AVG(rank),2) DESC`);
+            var [rows] = await connection.query(`SELECT genre, ROUND(AVG(rank),2) as ${"\`rank\`"} FROM ${table} WHERE genre IS NOT NULL group by genre order by ${"\`rank\`"} DESC`);
             await connection.commit();
         } catch (err) {
             await connection.rollback();
@@ -386,8 +386,8 @@ const DatabaseController = {
     // top 20 movies
     report3: async (req, res) => {
         var {isolation} = req.params;
-        var query_ge = `SELECT name, genre, rank FROM movies_ge_eighty ORDER BY rank DESC LIMIT 20`;
-        var query_lt = `SELECT name, genre, rank FROM movies_lt_eighty ORDER BY rank DESC LIMIT 20`;
+        var query_ge = `SELECT name, genre, ${"\`rank\`"} FROM movies_ge_eighty ORDER BY ${"\`rank\`"} DESC LIMIT 20`;
+        var query_lt = `SELECT name, genre, ${"\`rank\`"} FROM movies_lt_eighty ORDER BY ${"\`rank\`"} DESC LIMIT 20`;
 
         const connection = await connect();
         await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
@@ -439,7 +439,7 @@ const DatabaseController = {
         await connection.beginTransaction();
 
         try {
-            var [rows] = await connection.query(`SELECT name, genre, rank FROM ${table} ORDER BY rank DESC LIMIT 20`);
+            var [rows] = await connection.query(`SELECT name, genre, ${"\`rank\`"} FROM ${table} ORDER BY ${"\`rank\`"} DESC LIMIT 20`);
             await connection.commit();
         } catch (err) {
             await connection.rollback();
