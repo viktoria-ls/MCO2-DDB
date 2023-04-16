@@ -344,21 +344,21 @@ const DatabaseController = {
 }
 
 // Gets the max id from a table in a given node
-const getMaxId = async (port, table, isolation) => {
-    var response = await fetch(`http://${process.env.host}/api/maxId/${table}/${isolation}`);
+const getMaxId = async (host, table, isolation) => {
+    var response = await fetch(`http://${host}/api/maxId/${table}/${isolation}`);
     var jsonResponse = await response.json();
     return jsonResponse.maxId;
 }
 
-const getSearchQueryResult = async (port, table, isolation, searchQuery) => {
-    var response = await fetch(`http://${process.env.host}/api/search/${searchQuery}/${table}/${isolation}`);
+const getSearchQueryResult = async (host, table, isolation, searchQuery) => {
+    var response = await fetch(`http://${host}/api/search/${searchQuery}/${table}/${isolation}`);
     var jsonResponse = await response.json();
     return jsonResponse;
 }
 
 // Gets report 1 data from a table in a given node
-const getReport1 = async (port, table, isolation) => {
-    var response = await fetch(`http://${process.env.host}/api/report1/${table}/${isolation}`);
+const getReport1 = async (host, table, isolation) => {
+    var response = await fetch(`http://${host}/api/report1/${table}/${isolation}`);
     var jsonResponse = await response.json();
     return jsonResponse;
 }
