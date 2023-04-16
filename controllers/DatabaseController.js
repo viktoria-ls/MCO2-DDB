@@ -402,7 +402,7 @@ const DatabaseController = {
 
         try {
             await connection.query(`LOCK TABLES ${table} write;`);
-            var [rows] = await connection.query('SELECT genre, ROUND(AVG(`rank`),2)' + ' as `rank` FROM ' + table +' WHERE genre IS NOT NULL group by genre order by `rank` DESC');
+            var [rows] = await connection.query(`SELECT a.genre as genre, ROUND(AVG(a.rank), 2) as ranks FROM ${table} a WHERE genre IS NOT NULL group by genre order by ranks DESC`);
             await connection.commit();
         } catch (err) {
             await connection.rollback();
