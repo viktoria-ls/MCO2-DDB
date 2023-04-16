@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const MainController = require('../controllers/MainController');
 
+router.get('/testing', (req, res) => {
+    res.send({msg: "Please god work"});
+});
+
 // API endpoints for getting info from appropriate nodes and rendering pages
 router.get('/', MainController.getIndex);
 router.get('/node1', MainController.getCentralNode);

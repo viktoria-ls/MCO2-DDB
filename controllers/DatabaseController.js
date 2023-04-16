@@ -46,7 +46,7 @@ const DatabaseController = {
 
         try {
             // if in node1
-            if(process.env.nodePort == 38012) {
+            if(process.env.host == "172.16.3.112") {
                 // LOCK tables
                 var [rows] = await connection.query(max_id_lt_query);
                 var max_lt_80 = rows[0].id;
@@ -55,16 +55,16 @@ const DatabaseController = {
             }
     
             // if node2
-            else if(process.env.nodePort == 38013) {
+            else if(process.env.host == "172.16.3.113") {
                 // LOCK tables
                 var [rows] = await connection.query(max_id_lt_query);
                 var max_lt_80 = rows[0].id;
 
                 try {
-                    var max_ge_80 = await getMaxId(38012, "movies_ge_eighty", isolation);
+                    var max_ge_80 = await getMaxId("172.16.3.112", "movies_ge_eighty", isolation);
                 }
                 catch(err) {
-                    var max_ge_80 = await getMaxId(38014, "movies_ge_eighty", isolation);
+                    var max_ge_80 = await getMaxId("172.16.3.114", "movies_ge_eighty", isolation);
                 }
                 
             }
@@ -75,10 +75,10 @@ const DatabaseController = {
                 var max_ge_80 = rows[0].id;
 
                 try {
-                    var max_lt_80 = await getMaxId(38012, "movies_lt_eighty", isolation);
+                    var max_lt_80 = await getMaxId("172.16.3.112", "movies_lt_eighty", isolation);
                 }
                 catch(err) {
-                    var max_lt_80 = await getMaxId(38013, "movies_lt_eighty", isolation);
+                    var max_lt_80 = await getMaxId("172.16.3.113", "movies_lt_eighty", isolation);
                 }
             }
 
@@ -153,31 +153,31 @@ const DatabaseController = {
         await connection.beginTransaction();
 
         try {
-            if(process.env.nodePort == 38012 || process.env.nodePort == 38013) {     // if this is node1 or node2
+            if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
                 var [rows] = await connection.query(select + "movies_lt_eighty" + query);
                 var lt_rows = rows;
             }
-            if(process.env.nodePort == 38012 || process.env.nodePort == 38014) {   // if this is node1 or node3
+            if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
                 // LOCK TABLES
                 var [rows] = await connection.query(select + "movies_ge_eighty" + query);
                 var ge_rows = rows;
             }
 
-            if(process.env.nodePort == 38013) {     // gets data from other table
+            if(process.env.host == "172.16.3.113") {     // gets data from other table
                 // LOCK TABLES
                 try {
-                    var ge_rows = await getSearchQueryResult(38012, "movies_ge_eighty", isolation, searchQuery);
+                    var ge_rows = await getSearchQueryResult("172.16.3.112", "movies_ge_eighty", isolation, searchQuery);
                 } catch(err) {
-                    var ge_rows = await getSearchQueryResult(38014, "movies_ge_eighty", isolation, searchQuery);
+                    var ge_rows = await getSearchQueryResult("172.16.3.114", "movies_ge_eighty", isolation, searchQuery);
                 }
             }
-            else if(process.env.nodePort == 38014) { // gets data from other table
+            else if(process.env.host == "172.16.3.114") { // gets data from other table
                 // LOCK TABLES
                 try {
-                    var lt_rows = await getSearchQueryResult(38012, "movies_lt_eighty", isolation, searchQuery);
+                    var lt_rows = await getSearchQueryResult("172.16.3.112", "movies_lt_eighty", isolation, searchQuery);
                 } catch(err) {
-                    var lt_rows = await getSearchQueryResult(38013, "movies_lt_eighty", isolation, searchQuery);
+                    var lt_rows = await getSearchQueryResult("172.16.3.113", "movies_lt_eighty", isolation, searchQuery);
                 }
             }
 
@@ -258,31 +258,31 @@ const DatabaseController = {
         await connection.beginTransaction();
 
         try {
-            if(process.env.nodePort == 38012 || process.env.nodePort == 38013) {     // if this is node1 or node2
+            if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
                 var [rows] = await connection.query(query_lt);
                 var lt_rows = rows;
             }
-            if(process.env.nodePort == 38012 || process.env.nodePort == 38014) {   // if this is node1 or node3
+            if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.114") {   // if this is node1 or node3
                 // LOCK TABLES
                 var [rows] = await connection.query(query_ge);
                 var ge_rows = rows;
             }
 
-            if(process.env.nodePort == 38013) {     // gets data from other table
+            if(process.env.host == "172.16.3.113") {     // gets data from other table
                 // LOCK TABLES
                 try {
-                    var ge_rows = await getReport1(38012, "movies_ge_eighty", isolation);
+                    var ge_rows = await getReport1("172.16.3.112", "movies_ge_eighty", isolation);
                 } catch(err) {
-                    var ge_rows = await getReport1(38014, "movies_ge_eighty", isolation);
+                    var ge_rows = await getReport1("172.16.3.114", "movies_ge_eighty", isolation);
                 }
             }
-            else if(process.env.nodePort == 38014) { // gets data from other table
+            else if(process.env.host == "172.16.3.114") { // gets data from other table
                 // LOCK TABLES
                 try {
-                    var lt_rows = await getReport1(38012, "movies_lt_eighty", isolation);
+                    var lt_rows = await getReport1("172.16.3.112", "movies_lt_eighty", isolation);
                 } catch(err) {
-                    var lt_rows = await getReport1(38013, "movies_lt_eighty", isolation);
+                    var lt_rows = await getReport1("172.16.3.113", "movies_lt_eighty", isolation);
                 }
             }
 
@@ -345,20 +345,20 @@ const DatabaseController = {
 
 // Gets the max id from a table in a given node
 const getMaxId = async (port, table, isolation) => {
-    var response = await fetch(`http://${process.env.host}:${port}/api/maxId/${table}/${isolation}`);
+    var response = await fetch(`http://${process.env.host}/api/maxId/${table}/${isolation}`);
     var jsonResponse = await response.json();
     return jsonResponse.maxId;
 }
 
 const getSearchQueryResult = async (port, table, isolation, searchQuery) => {
-    var response = await fetch(`http://${process.env.host}:${port}/api/search/${searchQuery}/${table}/${isolation}`);
+    var response = await fetch(`http://${process.env.host}/api/search/${searchQuery}/${table}/${isolation}`);
     var jsonResponse = await response.json();
     return jsonResponse;
 }
 
 // Gets report 1 data from a table in a given node
 const getReport1 = async (port, table, isolation) => {
-    var response = await fetch(`http://${process.env.host}:${port}/api/report1/${table}/${isolation}`);
+    var response = await fetch(`http://${process.env.host}/api/report1/${table}/${isolation}`);
     var jsonResponse = await response.json();
     return jsonResponse;
 }
