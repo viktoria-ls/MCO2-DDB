@@ -343,8 +343,8 @@ const DatabaseController = {
 
     report2: async (req, res) => {
         var {isolation} = req.params;
-        var query_ge = 'SELECT genre, ROUND(AVG(mge.rank), 2) as ranks FROM movies_ge_eighty mge WHERE genre IS NOT NULL group by genre order by ranks DESC';
-        var query_lt = 'SELECT genre, ROUND(AVG(mlt.rank), 2) as ranks FROM movies_lt_eighty mlt WHERE genre IS NOT NULL group by genre order by ranks DESC';
+        var query_ge = 'SELECT mge.genre as genre, ROUND(AVG(mge.rank), 2) as ranks FROM movies_ge_eighty mge WHERE genre IS NOT NULL group by genre order by ranks DESC';
+        var query_lt = 'SELECT mlt.genre as genre, ROUND(AVG(mlt.rank), 2) as ranks FROM movies_lt_eighty mlt WHERE genre IS NOT NULL group by genre order by ranks DESC';
     
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
