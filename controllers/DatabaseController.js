@@ -130,6 +130,7 @@ const DatabaseController = {
         try {
             await connection.query(`LOCK TABLES ${table} write;`);
             var [rows] = await connection.query(query, Object.values(fields));
+            await connection.query("DO SLEEP(10);");
             await connection.commit();
             if(rows.affectedRows === 0)   // movie id not found
                 return res.status(404).json({error: ("No such movie found with id =  " + id)});
