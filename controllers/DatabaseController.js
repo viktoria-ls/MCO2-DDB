@@ -7,7 +7,7 @@ const max_id_ge_query = `SELECT MAX(id) as id FROM movies_ge_eighty`;
 // Establishes database connection
 const connect = async () => {
     const conn = await mysql.createConnection({
-        host: process.env.temphost,
+        host: process.env.host,
         database: process.env.database,
         user: process.env.user,
         password: process.env.password
