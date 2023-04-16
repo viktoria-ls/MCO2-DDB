@@ -55,6 +55,13 @@ const MainController = {
             res.send(jsonResponse.error);
     },
 
+    searchMovie: async function(req, res) {
+        var {searchQuery, isolation} = req.params;
+        var response = await fetch(`http://${process.env.host}:${process.env.nodePort}/api/search/${searchQuery}/${isolation}`);
+        var jsonResponse = await response.json();
+        return res.send(jsonResponse.rows);
+    },
+
     // Request body to send: {table, id, {fields}, isolation}
     updateMovie: async function(req, res) {
         if(process.env.nodePort == 38012) {     // if this is central node

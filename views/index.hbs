@@ -52,8 +52,7 @@
           data-icons="icons"
           data-icons-prefix="icon"
           data-show-columns="true"
-          data-show-toggle="true"
-          data-url="/sampleData.json">
+          data-show-toggle="true">
         </table>
       </div>
     </div>
@@ -69,20 +68,22 @@
         <option value="serializable" selected>Serializable</option>
       </select>
       <div class="row">
+
         <div class="col-sm-6">
           <!--Case #1: Search-->
-          <div class="card mb-2">
+          <div id="searchSection" class="card mb-2">
             <div class="card-body">
               <h5 class="card-title">Search</h5>
               <p class="card-text fs-6">Search using ID, Title, Year, Genre, Director, or Actor</p>
-              <input type="search" class="form-control mb-2" id="search">
-              <p class="text-danger" id="failSearchConcurrencyWarning"></p>
-              <a href="#" class="btn btn-primary">Search</a>
+              <input name="searchQuery" type="search" class="form-control mb-2" id="search" required>
+              <input class="isolation" type="text" name="isolation" hidden readonly>
+              <p class="text-danger" id="searchAlert"></p>
+              <button id="searchBtn" class="btn btn-primary">Search</button>
             </div>
           </div>
         </div>
+
         <div class="col-sm-6">
-          
           <!--Case #2: Delete-->
           <div id="deleteSection" class="card mb-2">
             <div class="card-body">
@@ -133,6 +134,10 @@
                 <input name="actor_2" type="text" class="form-control" id="updateActor2" placeholder="Actor 2" id="actor2floating"></input>
                 <label for="actor2floating">Actor 2</label>
                 </div>
+                <div class="form-floating my-2">
+                <input name="actor_3" type="text" class="form-control" id="updateActor3" placeholder="Actor 3" id="actor3floating"></input>
+                <label for="actor3floating">Actor 3</label>
+                </div>
                 <input name="isolation" type="text" class="isolation" hidden readonly>
               <p class="text-danger" id="updateAlert"></p>
               <button id="updateBtn" class="btn btn-primary">Update</button>
@@ -170,6 +175,10 @@
                 <div class="form-floating my-2">
                 <input name="actor_2" type="text" class="form-control" id="insertActor2" placeholder="Actor 2" id="insertactor2floating"></input>
                 <label for="insertactor2floating">Actor 2</label>
+                </div>
+                <div class="form-floating my-2">
+                <input name="actor_3" type="text" class="form-control" id="insertActor3" placeholder="Actor 3" id="insertactor3floating"></input>
+                <label for="insertactor3floating">Actor 3</label>
                 </div>
                 <input name="isolation" type="text" class="isolation" hidden readonly>
               <p class="text-danger" id="insertAlert"></p>
@@ -416,11 +425,11 @@
           valign: 'middle'
         }, {
           title: 'Movie Details',
-          colspan: 6,
+          colspan: 8,
           align: 'center'
         }],
         [{
-          field: 'title',
+          field: 'name',
           title: 'Title',
           align: 'center'
         }, {
@@ -436,12 +445,20 @@
           title: 'Director',
           align: 'center'
         }, {
-          field: 'actor1',
+          field: 'rank',
+          title: 'Rank',
+          align: 'center'
+        }, {
+          field: 'actor_1',
           title: 'Actor 1',
           align: 'center'
         }, {
-          field: 'actor2',
+          field: 'actor_2',
           title: 'Actor 2',
+          align: 'center'
+        }, {
+          field: 'actor_3',
+          title: 'Actor 3',
           align: 'center'
         }]
       ]

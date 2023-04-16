@@ -13,6 +13,8 @@ router.post('/updateMovie', MainController.updateMovie);
 router.post('/createMovie', MainController.createMovie)
 router.post('/deleteMovie', MainController.deleteMovie);
 
+router.get('/search/:searchQuery/:isolation', MainController.searchMovie);
+
 // API endpoints for reports
 router.get('/report1/:isolation', MainController.report1);
 router.get('/report2/:isolation', MainController.report2);

@@ -96,33 +96,6 @@ const DatabaseController = {
         res.status(200).json({msg: "Successfully created a new movie with id = " + values[values.length - 1], newId: values[values.length - 1]});
     },
 
-    readOne: async (req, res) => {
-        var {table, id, isolation} = req.body;
-
-        if(id !== 0 && !id)   // id is null
-            return res.status(400).json({error: "Movie id is required."});
-
-        var query = `SELECT * FROM ${table} WHERE id=${id}`;
-
-        const connection = await connect();     // starts db connection
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
-        await connection.beginTransaction();    // starts transaction
-
-        try {
-            var [rows] = await connection.query(query);
-            await connection.commit();
-        } catch (err) {
-            await connection.rollback();
-            return res.status(500).json({error: err.message});
-        } finally {
-            connection.end();
-        }
-
-        if(rows.length === 0)
-            return res.status(404).json({error: ("No such movie found with id =  " + id)});
-        res.status(200).json({result: {...(rows[0])}});
-    },
-
     // Request body: {table, id, {fields}, isolation}
     update: async (req, res) => {
         var {table, id, isolation, fields} = req.body;
@@ -160,6 +133,91 @@ const DatabaseController = {
         }
 
         res.status(200).json({msg: ("Successfully updated movie with id = " + id), updatedId: id});
+    },
+
+    search: async (req, res) => {
+        var {searchQuery, isolation} = req.params;
+
+        var select = 'SELECT * FROM ';
+        var query = ` WHERE name LIKE '%${searchQuery}%'
+                     OR id LIKE '%${searchQuery}%'
+                     OR year LIKE '%${searchQuery}%'
+                     OR genre LIKE '%${searchQuery}%'
+                     OR director LIKE '%${searchQuery}%'
+                     OR ${"\`rank\`"} LIKE '%${searchQuery}%'
+                     OR actor_1 LIKE '%${searchQuery}%'
+                     OR actor_2 LIKE '%${searchQuery}%'`;
+
+        const connection = await connect();
+        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.beginTransaction();
+
+        try {
+            if(process.env.nodePort == 38012 || process.env.nodePort == 38013) {     // if this is node1 or node2
+                // LOCK TABLES
+                var [rows] = await connection.query(select + "movies_lt_eighty" + query);
+                var lt_rows = rows;
+            }
+            if(process.env.nodePort == 38012 || process.env.nodePort == 38014) {   // if this is node1 or node3
+                // LOCK TABLES
+                var [rows] = await connection.query(select + "movies_ge_eighty" + query);
+                var ge_rows = rows;
+            }
+
+            if(process.env.nodePort == 38013) {     // gets data from other table
+                // LOCK TABLES
+                try {
+                    var ge_rows = await getSearchQueryResult(38012, "movies_ge_eighty", isolation, searchQuery);
+                } catch(err) {
+                    var ge_rows = await getSearchQueryResult(38014, "movies_ge_eighty", isolation, searchQuery);
+                }
+            }
+            else if(process.env.nodePort == 38014) { // gets data from other table
+                // LOCK TABLES
+                try {
+                    var lt_rows = await getSearchQueryResult(38012, "movies_lt_eighty", isolation, searchQuery);
+                } catch(err) {
+                    var lt_rows = await getSearchQueryResult(38013, "movies_lt_eighty", isolation, searchQuery);
+                }
+            }
+
+        } catch (err) {
+            await connection.rollback();
+            return res.status(500).json({error: err.message});
+        } finally {
+            connection.end();
+        }
+
+        res.status(200).json({rows: [...ge_rows, ...lt_rows]});
+    },
+
+    searchFromNode: async (req, res) => {
+        var {table, isolation, searchQuery} = req.params;
+        const connection = await connect();
+        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.beginTransaction();
+
+        var query = `SELECT * FROM ${table}
+                     WHERE name LIKE '%${searchQuery}%'
+                     OR id LIKE '%${searchQuery}%'
+                     OR year LIKE '%${searchQuery}%'
+                     OR genre LIKE '%${searchQuery}%'
+                     OR director LIKE '%${searchQuery}%'
+                     OR ${"\`rank\`"} LIKE '%${searchQuery}%'
+                     OR actor_1 LIKE '%${searchQuery}%'
+                     OR actor_2 LIKE '%${searchQuery}%'`;
+
+        try {
+            var [rows] = await connection.query(query);
+            await connection.commit();
+        } catch (err) {
+            await connection.rollback();
+            return res.status(500).json({error: err.message});
+        } finally {
+            connection.end();
+        }
+
+        res.status(200).send(rows);
     },
 
     // Request body: {table, id, isolation}
@@ -290,6 +348,12 @@ const getMaxId = async (port, table, isolation) => {
     var response = await fetch(`http://${process.env.host}:${port}/api/maxId/${table}/${isolation}`);
     var jsonResponse = await response.json();
     return jsonResponse.maxId;
+}
+
+const getSearchQueryResult = async (port, table, isolation, searchQuery) => {
+    var response = await fetch(`http://${process.env.host}:${port}/api/search/${searchQuery}/${table}/${isolation}`);
+    var jsonResponse = await response.json();
+    return jsonResponse;
 }
 
 // Gets report 1 data from a table in a given node

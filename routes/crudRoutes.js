@@ -4,9 +4,11 @@ const DatabaseController = require('../controllers/DatabaseController');
 
 // API endpoints for CRUD operations
 router.post('/create', DatabaseController.create);
-router.get('/readOne', DatabaseController.readOne);
 router.patch('/update', DatabaseController.update);
 router.delete('/delete', DatabaseController.delete);
+
+router.get('/search/:searchQuery/:isolation', DatabaseController.search);
+router.get('/search/:searchQuery/:table/:isolation', DatabaseController.searchFromNode);
 
 // API endpoint for getting max IDs
 router.get('/maxId/:table/:isolation', DatabaseController.maxId);
