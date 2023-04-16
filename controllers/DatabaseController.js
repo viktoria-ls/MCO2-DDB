@@ -16,13 +16,6 @@ const connect = async () => {
     return conn;
 }
 
-// Gets the max id from a table in a given node
-const getMaxId = async (port, table, isolation) => {
-    var response = await fetch(`http://localhost:${port}/api/maxId/${table}/${isolation}`);
-    var jsonResponse = await response.json();
-    return jsonResponse.maxId;
-}
-
 // CRUD transactions (not directly invoked on frontend; invoked in MainController)
 const DatabaseController = {
     // Request body: {table, {fields}, isolation}
@@ -197,6 +190,35 @@ const DatabaseController = {
         res.status(200).json({msg: ("Successfully deleted movie with id = " + id)});
     },
 
+    report1: async (req, res) => {
+        var {isolation} = req.body;
+        var query_lt = `SELECT year, COUNT(*) as count FROM movies_lt_eighty GROUP BY year ORDER BY 1 DESC`;
+        var query_ge = `SELECT year, COUNT(*) as count FROM movies_ge_eighty GROUP BY year ORDER BY 1 DESC`;
+
+        const connection = await connect();
+        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+        await connection.beginTransaction();
+
+        try {
+            
+        } catch (err) {
+            await connection.rollback();
+            return res.status(500).json({error: err.message});
+        } finally {
+            connection.end();
+        }
+
+        res.status(200).json({msg: ("Successfully deleted movie with id = " + id)});
+    },
+
+    report2: async (req, res) => {
+        var query = ``;
+    },
+
+    report3: async (req, res) => {
+        var query = ``;
+    },
+
     maxId: async (req, res) => {
         var {table, isolation} = req.params;
         const connection = await connect();
@@ -215,6 +237,20 @@ const DatabaseController = {
 
         res.status(200).json({maxId: rows[0].id});
     }
+}
+
+// Gets the max id from a table in a given node
+const getMaxId = async (port, table, isolation) => {
+    var response = await fetch(`http://localhost:${port}/api/maxId/${table}/${isolation}`);
+    var jsonResponse = await response.json();
+    return jsonResponse.maxId;
+}
+
+// Gets report 1 data from a table in a given node
+const getReport1 = async (port, table, isolation) => {
+    var response = await fetch(`http://localhost:${port}/api/report1/${table}/${isolation}`);
+    var jsonResponse = await response.json();
+    return jsonResponse;
 }
 
 module.exports =  DatabaseController;

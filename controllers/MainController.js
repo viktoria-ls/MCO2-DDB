@@ -121,20 +121,24 @@ const MainController = {
             res.send(jsonResponse);
     },
 
+    // Number of Movies per Year
     report1: async function(req, res) {
-        // TODO
+        // Get number of movies per year for each table, descending order
+        // concatenate results
     },
 
+    // Average rank of all Movies under each Genre
     report2: async function(req, res) {
         // TODO
     },
 
+    // Top 20 highest ranking Movies for each Genre
     report3: async function(req, res) {
         // TODO
     },
 }
 
-// Used to insert to a table on a given port
+// Inserts into a table on a given port
 const callCreate = async (port, table, body) => {
     var fieldsCopy = {...body};
     var {isolation} = fieldsCopy;
@@ -149,6 +153,7 @@ const callCreate = async (port, table, body) => {
     return response;
 }
 
+// Updates a record from a table on a given port
 const callUpdate = async (port, table, body) => {
     var fieldsCopy = {...body};
     var {isolation, id} = fieldsCopy;
@@ -164,6 +169,7 @@ const callUpdate = async (port, table, body) => {
     return response;
 }
 
+// Deletes a record from a table on a given port
 const callDelete = async (port, table, body) => {
     var {isolation, id} = body;
 
