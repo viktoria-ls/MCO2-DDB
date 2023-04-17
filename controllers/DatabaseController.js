@@ -351,7 +351,7 @@ const DatabaseController = {
         // await connection.beginTransaction();
         await connection.query('SET autocommit=0');
         try {
-            //await connection.query(`LOCK TABLES ${table} write;`);
+            await connection.query(`LOCK TABLES ${table} write;`);
             if(process.env.host == "172.16.3.112" || process.env.host == "172.16.3.113") {     // if this is node1 or node2
                 // LOCK TABLES
                 await connection.query(`LOCK TABLES movies_lt_eighty WRITE;`);
@@ -411,7 +411,6 @@ const DatabaseController = {
             await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
-        console.log("ENTRIES:"+ rows);
 
         res.status(200).send(rows);
     },
