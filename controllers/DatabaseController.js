@@ -411,7 +411,7 @@ const DatabaseController = {
             await connection.query(`UNLOCK TABLES;`);
             connection.end();
         }
-        console.log(rows);
+        console.log("ENTRIES:"+ rows);
 
         res.status(200).send(rows);
     },
