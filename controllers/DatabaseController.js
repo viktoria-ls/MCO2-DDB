@@ -7,7 +7,7 @@ const max_id_ge_query = `SELECT MAX(id) as id FROM movies_ge_eighty`;
 // Establishes database connection
 const connect = async () => {
     const conn = await mysql.createConnection({
-        host: process.env.temphost,
+        host: process.env.host,
         database: process.env.database,
         user: process.env.user,
         password: process.env.password
@@ -343,8 +343,8 @@ const DatabaseController = {
 
     report2: async (req, res) => {
         var {isolation} = req.params;
-        var query_ge = `SELECT genre, ROUND(AVG(\`rank\`), 2) as \`rank\` FROM movies_ge_eighty WHERE genre IS NOT NULL group by genre order by \`rank\` DESC`;
-        var query_lt = `SELECT genre, ROUND(AVG(\`rank\`), 2) as \`rank\` FROM movies_lt_eighty WHERE genre IS NOT NULL group by genre order by \`rank\` DESC`;
+        var query_ge = `SELECT genre, ROUND(AVG(${"\`rank\`"}), 2) as ${"\`rank\`"} FROM movies_ge_eighty WHERE genre IS NOT NULL group by genre order by ${"\`rank\`"} DESC`;
+        var query_lt = `SELECT genre, ROUND(AVG(${"\`rank\`"}), 2) as ${"\`rank\`"} FROM movies_lt_eighty WHERE genre IS NOT NULL group by genre order by ${"\`rank\`"} DESC`;
     
         const connection = await connect();
         await connection.query(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
@@ -402,7 +402,7 @@ const DatabaseController = {
 
         try {
             await connection.query(`LOCK TABLES ${table} write;`);
-            var [rows] = await connection.query(`SELECT genre, ROUND(AVG(rank),2) as ${"\`rank\`"} FROM ${table} WHERE genre IS NOT NULL group by genre order by ${"\`rank\`"} DESC`);
+            var [rows] = await connection.query(`SELECT genre, ROUND(AVG(${"\`rank\`"}), 2) as ${"\`rank\`"} FROM ${table} WHERE genre IS NOT NULL group by genre order by ${"\`rank\`"} DESC`);
             await connection.commit();
         } catch (err) {
             await connection.rollback();
